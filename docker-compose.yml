@@ -191,13 +191,10 @@ services:
   # ODOO
   # ============================================================================
   odoo:
-    # Open-source base by default; hospitals set ODOO_IMAGE to the private image
-    # (e.g. trigonaltechnology/nidan_odoo_pro:stable) which bakes the closed-source
-    # addons into /mnt/private-addons. No host addon source is mounted in prod.
-    # image: ${ODOO_IMAGE:-trigonaltechnology/nidan_odoo:stable}
-    image: trigonaltechnology/nidan_odoo_pro:latest
+    # Published image includes the runtime and addons; override ODOO_IMAGE as needed.
+    image: ${ODOO_IMAGE:-trigonaltechnology/nidan_odoo_pro:latest}
     container_name: nidan-odoo
-    command: sh -c "odoo -d \${ODOO_DB_NAME:-nidan} --proxy-mode --dev=xml -u all"
+    command: [ "odoo", "-d", "${ODOO_DB_NAME:-nidan}", "--proxy-mode", "--dev=xml", "-u", "all" ]
     ports:
       - "8069:8069"
     environment:

@@ -108,3 +108,20 @@ docker-compose up -d
 *   **OpenMRS**: [http://localhost/openmrs](http://localhost/openmrs)
 *   **Odoo**: [http://localhost:8069](http://localhost:8069)
 
+### Interactive container management
+Create `.env` from `env.template` and customize it before starting the stack. Then run:
+```bash
+./manage-containers.sh
+```
+Choose the standard `docker-compose.yml` stack or the `dev.docker-compose.yml` stack, then select an action:
+- **Build selected services** lists services with local build definitions; enter one or more service numbers to build only those services.
+- **Build and start selected services** builds only the selected services and starts them in detached mode (Compose may also start their dependencies).
+- **Pull selected prebuilt images** lets you select services that use prebuilt images instead of local build definitions.
+- **Build and start minimum Core EHR API** starts `openmrs-backend` and its required `openmrs-db` dependency only. It excludes the frontend, gateway, and optional integrations; services already running are left unchanged.
+- **Start all services** starts the stack in detached mode. For the development stack, it first builds the gateway locally; Odoo uses the published image configured by `ODOO_IMAGE` (default: `trigonaltechnology/nidan_odoo_pro:latest`). A first OpenMRS startup can take 15–25 minutes while its modules and metadata initialize.
+- **Stop all services** stops the stack without removing its containers.
+- **Remove containers** removes the stack's containers and network after confirmation. Named data volumes are preserved.
+- **Show status** lists the stack's containers.
+- **List all services and image sources** shows every service and whether it is locally buildable or uses a prebuilt image.
+
+The build list is intentionally limited to services with a `build:` definition in the selected Compose file. The standard stack has two (`openmrs-backend` and `superset`); the development stack has three (`gateway`, `nidan-cis`, and `nidan-ois`). Odoo uses the published image configured by `ODOO_IMAGE`; it has no local Dockerfile in this repository. Other services specify an `image:` and have no local Docker build context, so Compose cannot build them from this repository; use the pull option to fetch their images instead.

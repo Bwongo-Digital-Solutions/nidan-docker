@@ -81,14 +81,15 @@ services:
         condition: service_healthy
     volumes:
       - openmrs-data:/openmrs/data
-      # - ./openmrs/custom_modules:/openmrs/data/modules
+      # CIS requires orderexpansion order types (radiology, procedure, medical supply).
+      - ./openmrs/custom_modules/orderexpansion-1.0.1-nidan-SNAPSHOT.omod:/openmrs/data/modules/orderexpansion-1.0.1-nidan-SNAPSHOT.omod:ro
       #- ./openmrs/runtime/openmrs-runtime.properties:/openmrs/openmrs-runtime.properties
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/openmrs/" ]
       interval: 30s
-      timeout: 10s
+      timeout: 30s
       retries: 10
-      start_period: 120s
+      start_period: 30m
 
   openmrs-frontend:
     image: openmrs/openmrs-reference-application-3-frontend:${TAG:-qa}
@@ -140,10 +141,9 @@ services:
   # ODOO
   # ============================================================================
   odoo:
-    build: ./odoo
-    image: nidan/odoo:19
+    image: ${ODOO_IMAGE:-trigonaltechnology/nidan_odoo_pro:latest}
     container_name: nidan-odoo
-    command: sh -c "odoo -d \${ODOO_DB_NAME:-nidan} -i base"
+    command: [ "odoo", "-d", "${ODOO_DB_NAME:-nidan}", "-i", "base" ]
     ports:
       - "8069:8069"
     environment:
@@ -196,7 +196,7 @@ services:
       ODOO_DB_PASSWORD: ${ODOO_DB_PASSWORD}
     volumes:
       - odoo-db-data:/var/lib/postgresql/data
-      - ./odoo-db/init-odoo-db.sh:/docker-entrypoint-initdb.d/init-odoo-db.sh:ro
+      - ./odoo/db/init-odoo-db.sh:/docker-entrypoint-initdb.d/init-odoo-db.sh:ro
     networks:
       - nidan-network
     healthcheck:
@@ -229,7 +229,13 @@ services:
     depends_on:
       - keycloak-db
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/auth/realms/master" ]
+      test:
+        - CMD-SHELL
+        - >-
+          bash -ec 'exec 3<>/dev/tcp/127.0.0.1/8080;
+          printf "GET /auth/realms/master HTTP/1.0\r\nHost: localhost\r\n\r\n" >&3;
+          IFS= read -r status <&3;
+          [[ "$$status" == *" 200 "* ]]'
       interval: 30s
       timeout: 10s
       retries: 5
@@ -286,11 +292,11 @@ services:
       - certbot-etc:/etc/letsencrypt:ro
       # Static configuration file
       - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
+      - ./orthanc/webhook.lua:/etc/orthanc/webhook.lua:ro
       # Worklist directory for MWL plugin
       - ./orthanc/worklists:/var/lib/orthanc/worklists
     healthcheck:
-      # AuthenticationEnabled in orthanc.json — /system needs Basic auth (same as the browser UI).
-      test: [ "CMD-SHELL", "curl -sf -u \"$ORTHANC_USERNAME:$ORTHANC_PASSWORD\" http://127.0.0.1:8042/system -o /dev/null" ]
+      test: [ "CMD", "python3", "-c", "import socket; s = socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.settimeout(1); s.connect(('127.0.0.1', 8042))" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -388,7 +394,7 @@ services:
       - openelis-lucene-index:/var/lib/lucene_index
       - ./openelis/volume/properties/common.properties:/run/secrets/common.properties:ro
       - ./openelis/volume/certs:/etc/openelis-global:ro
-      - ./OpenELIS-Global.war:/usr/local/tomcat/webapps/OpenELIS-Global.war:ro
+      # For local WAR overrides, mount an existing OpenELIS-Global.war as documented in integration.md.
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8080/OpenELIS-Global/ || exit 1" ]
       interval: 30s
@@ -408,8 +414,7 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - REACT_APP_SERVER_BASE=/api/OpenELIS-Global # This tells frontend where backend is
-    volumes:
-      - ./openelis/frontend-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    # Use the image's bundled nginx configuration unless a local override file exists.
     networks:
       - nidan-network
 
@@ -473,10 +478,6 @@ services:
     ports:
       - "${CIS_PORT:-8081}:${CIS_PORT:-8081}"
 
-    # TLS truststore: run scripts/create-gateway-truststore.sh if gateway-truststore.p12 is missing.
-    # Override with CIS_JAVA_TOOL_OPTIONS= (empty) only when debugging without this mount.
-    volumes:
-      - ./gateway-truststore.p12:/etc/ssl/certs/gateway-truststore.p12:ro
     environment:
       # Database
       - INTEGRATION_DB_URL=jdbc:postgresql://${INTEGRATION_DB_HOST:-nidan-integration-db}:${INTEGRATION_DB_PORT:-5432}/${INTEGRATION_DB_NAME:-nidan_integration}
@@ -511,7 +512,9 @@ services:
       - OPENELIS_ORDER_BUNDLE_PATH=${OPENELIS_ORDER_BUNDLE_PATH:-/fhir/tasks}
       - OPENELIS_USERNAME=${OPENELIS_USERNAME:-admin}
       - OPENELIS_PASSWORD=${OPENELIS_PASSWORD:-adminADMIN!}
-      - JAVA_TOOL_OPTIONS=${CIS_JAVA_TOOL_OPTIONS:--Djavax.net.ssl.trustStore=/etc/ssl/certs/gateway-truststore.p12 -Djavax.net.ssl.trustStorePassword=gatewayTrust123 -Djdk.internal.httpclient.disableHostnameVerification=true}
+      # Keep the JVM's bundled truststore by default; set CIS_JAVA_TOOL_OPTIONS only
+      # when a custom truststore has been provided for HTTPS integration endpoints.
+      - JAVA_TOOL_OPTIONS=${CIS_JAVA_TOOL_OPTIONS:-}
       # Integration
       - INTEGRATION_SOURCE_SYSTEM=${INTEGRATION_SOURCE_SYSTEM:-CIS}
       - INTEGRATION_SKIP_SOURCE_SYSTEMS=${INTEGRATION_SKIP_SOURCE_SYSTEMS:-OPENMRS}

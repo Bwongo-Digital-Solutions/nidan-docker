@@ -15,11 +15,11 @@ The Odoo 19 image is a two-layer stack:
 
 ## Which image runs
 
-Production `docker-compose.yml` pulls `${ODOO_IMAGE:-trigonaltechnology/nidan_odoo:stable}`.
-Hospitals that need the proprietary modules set in `.env`:
+Both Compose stacks pull `${ODOO_IMAGE:-trigonaltechnology/nidan_odoo_pro:latest}`.
+To use the open-source base instead of the Pro image, set in `.env`:
 
 ```
-ODOO_IMAGE=trigonaltechnology/nidan_odoo_pro:stable
+ODOO_IMAGE=trigonaltechnology/nidan_odoo:stable
 ```
 
 Addons are **baked into the image** in production — no host source is mounted, so

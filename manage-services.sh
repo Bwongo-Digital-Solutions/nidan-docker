@@ -29,7 +29,7 @@ service_container() {
   printf '%s' "$id"
 }
 list_services() {
-  compose config --format json | python3 -c 'import json,sys; s=json.load(sys.stdin)["services"]; [print(f"{n:28} {("build" if c.get("build") else c.get("image","no image"))} {("profiles="+",".join(c.get("profiles",[]))) if c.get("profiles") else ""}") for n,c in s.items()]'
+  compose config --format json | python3 -c 'import json,sys; s=json.load(sys.stdin)["services"]; [print("{}\t{}\t{}".format(n, "local build" if v.get("build") else v.get("image","no image"), ",".join(v.get("profiles",[])))) for n,v in s.items()]'
 }
 select_service() {
   local prompt="$1" selection

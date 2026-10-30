@@ -117,7 +117,7 @@ select_services() {
     for index in "${!service_names[@]}"; do
         if [[ "$operation" == "build" && "${service_buildable[$index]}" == "yes" ]]; then
             eligible_services+=("$index")
-        elif [[ "$operation" == "pull" && -n "${service_images[$index]}" ]]; then
+        elif [[ "$operation" == "pull" && "${service_buildable[$index]}" != "yes" && -n "${service_images[$index]}" ]]; then
             eligible_services+=("$index")
         elif [[ "$operation" == "manage" ]]; then
             eligible_services+=("$index")

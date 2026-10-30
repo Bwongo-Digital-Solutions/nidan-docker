@@ -54,6 +54,7 @@ load_services() {
     service_names=()
     service_buildable=()
     service_images=()
+    service_profiles=()
     if ! command -v python3 >/dev/null 2>&1; then
         printf 'Error: python3 is required to read Compose service definitions.\n' >&2
         return 1
@@ -113,7 +114,9 @@ select_services() {
     for index in "${!service_names[@]}"; do
         if [[ "$operation" == "build" && "${service_buildable[$index]}" == "yes" ]]; then
             eligible_services+=("$index")
-        elif [[ "$operation" == "pull" && "${service_buildable[$index]}" != "yes" && -n "${service_images[$index]}" ]]; then
+        elif [[ "$operation" == "pull" && -n "${service_images[$index]}" ]]; then
+            eligible_services+=("$index")
+        elif [[ "$operation" == "manage" ]]; then
             eligible_services+=("$index")
         fi
     done
@@ -260,7 +263,7 @@ while true; do
     printf '  9) List all services and image sources\n'
     printf '  10) Copy frontend static files without rebuilding\n'
     printf '  11) Exit\n'
-    read -r -p 'Choice [1-11]: ' action
+    read -r -p 'Choice [1-14]: ' action
 
     case "$action" in
         1)
@@ -311,6 +314,21 @@ while true; do
             sync_frontend_static_files
             ;;
         11)
+            if select_services manage; then
+                compose restart "${selected_services[@]}"
+            fi
+            ;;
+        12)
+            if select_services manage; then
+                compose stop "${selected_services[@]}"
+            fi
+            ;;
+        13)
+            if select_services manage; then
+                compose logs --tail=200 --follow "${selected_services[@]}"
+            fi
+            ;;
+        14)
             exit 0
             ;;
         *)

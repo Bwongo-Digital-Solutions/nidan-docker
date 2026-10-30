@@ -327,11 +327,10 @@ while true; do
             fi
             ;;
         14)
-            if [[ -x openmrs/manage-openmrs.sh ]]; then
-                ./openmrs/manage-openmrs.sh
+            if [[ "$compose_file" == "dev.docker-compose.yml" ]]; then
+                bash openmrs/manage-openmrs.sh --dev
             else
-                printf 'OpenMRS helper is missing or not executable: openmrs/manage-openmrs.sh\\n' >&2
-                printf 'Run: chmod +x openmrs/manage-openmrs.sh\\n'
+                bash openmrs/manage-openmrs.sh
             fi
             ;;
         15)

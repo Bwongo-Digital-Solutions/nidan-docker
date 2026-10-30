@@ -50,7 +50,7 @@ compose_all_profiles() {
 }
 
 load_services() {
-    local service_line service_name build_context image_reference services_output
+    local service_line service_name build_context image_reference profiles services_output
     service_names=()
     service_buildable=()
     service_images=()

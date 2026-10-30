@@ -132,9 +132,29 @@ EOF
   image="${ODOO_BASE_IMAGE:-trigonaltechnology/nidan_odoo:stable}"
   echo "Building the open-source Odoo base image from $base_dir/packages."
   docker build -f "$dockerfile" -t "$image" "$base_dir/packages"
-  echo "Built $image locally. No registry push was performed."
-  echo "For the Pro image, build the private nidan_odoo_extra_addons/packages/Dockerfile AFTER this base image."
-  echo "Set ODOO_IMAGE to trigonaltechnology/nidan_odoo_pro:stable in the Compose configuration when deploying Pro."
+
+  # The current Compose file may pin a different tag (for example :latest).
+  # Tag the same locally-built base image for that configured reference too.
+  local compose_image
+  compose_image="$(service_image odoo)"
+  if [[ -n "$compose_image" && "$compose_image" != "$image" ]]; then
+    docker tag "$image" "$compose_image"
+    echo "Tagged base image as the Compose-configured image: $compose_image"
+  fi
+
+  local pro_dir="${ODOO_PRIVATE_ADDONS_REPO_DIR:-../nidan_odoo_extra_addons}"
+  local pro_dockerfile="$pro_dir/packages/Dockerfile"
+  if [[ -f "$pro_dockerfile" ]]; then
+    local pro_image="${ODOO_PRO_IMAGE:-trigonaltechnology/nidan_odoo_pro:stable}"
+    echo "Building the private Pro layer after the base image: $pro_dir/packages"
+    docker build -f "$pro_dockerfile" -t "$pro_image" "$pro_dir/packages"
+    echo "Built $pro_image locally. No registry push was performed."
+    echo "To run Pro, configure the odoo service image as $pro_image before starting it."
+  else
+    echo "Private Odoo addons repo not found at $pro_dir; skipped the optional Pro layer."
+    echo "If needed, set ODOO_PRIVATE_ADDONS_REPO_DIR to its checkout and rerun."
+  fi
+  echo "Build order followed: open-source base first, private Pro layer second (when available)."
 }
 build_custom_modules() {
   local source_root="${OPENMRS_BACKEND_DIR:-../openmrs-backend}"

@@ -9,6 +9,7 @@ if [[ "${1:-}" == "--dev" ]]; then COMPOSE_FILE="dev.docker-compose.yml"; shift;
 if [[ ! -f "$COMPOSE_FILE" ]]; then echo "Compose file not found: $COMPOSE_FILE" >&2; exit 1; fi
 if [[ ! -f .env ]]; then echo "Missing .env; configure it before continuing." >&2; exit 1; fi
 if ! command -v docker >/dev/null 2>&1; then echo "Docker is required." >&2; exit 1; fi
+if ! command -v python3 >/dev/null 2>&1; then echo "Python 3 is required to inspect Compose service definitions." >&2; exit 1; fi
 if docker compose version >/dev/null 2>&1; then COMPOSE=(docker compose)
 elif command -v docker-compose >/dev/null 2>&1; then COMPOSE=(docker-compose)
 else echo "Docker Compose is required." >&2; exit 1; fi

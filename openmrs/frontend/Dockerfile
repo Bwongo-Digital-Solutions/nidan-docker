@@ -109,7 +109,7 @@ COPY --from=dev /app/spa /usr/share/nginx/html
 COPY config-core_demo.json /usr/share/nginx/html
 
 COPY /resources/favicon.ico /usr/share/nginx/html/favicon.ico
-COPY /resources/nidan-logo-full.png /usr/share/nginx/html
-COPY /resources/nidan-logo-white.png /usr/share/nginx/html
+COPY /resources/clinicemr-logo.svg /usr/share/nginx/html
+COPY /resources/clinicemr-logo-white.svg /usr/share/nginx/html
 
 CMD ["/usr/local/bin/startup.sh"]

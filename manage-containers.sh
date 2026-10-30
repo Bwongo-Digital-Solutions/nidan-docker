@@ -56,25 +56,25 @@ load_services() {
     service_images=()
     service_profiles=()
     if ! command -v python3 >/dev/null 2>&1; then
-        printf 'Error: python3 is required to read Compose service definitions.\\n' >&2
+        printf 'Error: python3 is required to read Compose service definitions.\n' >&2
         return 1
     fi
 
     if ! services_output="$(
         compose config --format json |
-            python3 -c 'import json, sys; services = json.load(sys.stdin).get("services", {}); [print("{}\\t{}\\t{}\\t{}".format(name, "yes" if config.get("build") else "no", config.get("image", ""), ",".join(config.get("profiles", [])))) for name, config in services.items()]'
+            python3 -c 'import json, sys; services = json.load(sys.stdin).get("services", {}); [print("{}\t{}\t{}\t{}".format(name, "yes" if config.get("build") else "no", config.get("image", ""), ",".join(config.get("profiles", [])))) for name, config in services.items()]'
     )"; then
-        printf 'Error: could not read Compose service definitions.\\n' >&2
+        printf 'Error: could not read Compose service definitions.\n' >&2
         return 1
     fi
 
     if [[ -z "$services_output" ]]; then
-        printf 'No services were found in %s.\\n' "$compose_file"
+        printf 'No services were found in %s.\n' "$compose_file"
         return 1
     fi
 
     while IFS= read -r service_line; do
-        IFS=$'\\t' read -r service_name build_context image_reference profiles <<< "$service_line"
+        IFS=$'\t' read -r service_name build_context image_reference profiles <<< "$service_line"
         service_names+=("$service_name")
         service_buildable+=("$build_context")
         service_images+=("$image_reference")
@@ -88,7 +88,7 @@ show_services() {
         return 1
     fi
 
-    printf '\\nServices in %s:\\n' "$compose_file"
+    printf '\nServices in %s:\n' "$compose_file"
     for index in "${!service_names[@]}"; do
         if [[ "${service_buildable[$index]}" == "yes" ]]; then
             status="local build"
@@ -99,7 +99,7 @@ show_services() {
         fi
         printf '  %s - %s' "${service_names[$index]}" "$status"
         [[ -n "${service_profiles[$index]}" ]] && printf ' [profiles: %s]' "${service_profiles[$index]}"
-        printf '\\n'
+        printf '\n'
     done
 }
 
@@ -126,29 +126,29 @@ select_services() {
 
     eligible_count="${#eligible_services[@]}"
     if ((eligible_count == 0)); then
-        printf 'No eligible services found in %s.\\n' "$compose_file"
+        printf 'No eligible services found in %s.\n' "$compose_file"
         return 1
     fi
 
     case "$operation" in
-        build) printf '\\nServices with local build definitions in %s:\\n' "$compose_file" ;;
-        pull) printf '\\nServices with images in %s:\\n' "$compose_file" ;;
-        *) printf '\\nSelect services in %s:\\n' "$compose_file" ;;
+        build) printf '\nServices with local build definitions in %s:\n' "$compose_file" ;;
+        pull) printf '\nServices with images in %s:\n' "$compose_file" ;;
+        *) printf '\nSelect services in %s:\n' "$compose_file" ;;
     esac
 
     for index in "${!eligible_services[@]}"; do
         service="${eligible_services[$index]}"
         if [[ "$operation" == "pull" ]]; then
-            printf '  %d) %s (%s)\\n' "$((index + 1))" "${service_names[$service]}" "${service_images[$service]}"
+            printf '  %d) %s (%s)\n' "$((index + 1))" "${service_names[$service]}" "${service_images[$service]}"
         else
-            printf '  %d) %s\\n' "$((index + 1))" "${service_names[$service]}"
+            printf '  %d) %s\n' "$((index + 1))" "${service_names[$service]}"
         fi
     done
 
-    printf 'Enter one or more service numbers separated by spaces or commas (q to cancel).\\n'
+    printf 'Enter one or more service numbers separated by spaces or commas (q to cancel).\n'
     read -r -p 'Services: ' selection
     if [[ "$selection" == "q" || "$selection" == "Q" ]]; then
-        printf 'Operation cancelled.\\n'
+        printf 'Operation cancelled.\n'
         return 1
     fi
 
@@ -156,12 +156,12 @@ select_services() {
     read -r -a service_choices <<< "$selection"
     for service in "${service_choices[@]}"; do
         if [[ ! "$service" =~ ^[0-9]+$ ]]; then
-            printf 'Invalid service number: %s\\n' "$service" >&2
+            printf 'Invalid service number: %s\n' "$service" >&2
             return 1
         fi
         index=$((10#$service - 1))
         if ((index < 0 || index >= eligible_count)); then
-            printf 'Service number out of range: %s\\n' "$service" >&2
+            printf 'Service number out of range: %s\n' "$service" >&2
             return 1
         fi
         service="${service_names[${eligible_services[$index]}]}"
@@ -170,8 +170,10 @@ select_services() {
         fi
     done
 
-    (("${#selected_services[@]}" > 0)) || return 1
-    printf 'Selected services: %s\\n' "${selected_services[*]}"
+    if ((${#selected_services[@]} == 0)); then
+        return 1
+    fi
+    printf 'Selected services: %s\n' "${selected_services[*]}"
 }
 
 confirm_removal() {

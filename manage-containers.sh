@@ -256,7 +256,10 @@ while true; do
     printf '  8) Show status\n'
     printf '  9) List all services and image sources\n'
     printf '  10) Copy frontend static files without rebuilding\n'
-    printf '  11) Exit\n'
+    printf '  11) Restart selected services\n'
+    printf '  12) Stop selected services\n'
+    printf '  13) Show logs for selected services\n'
+    printf '  14) Exit\n'
     read -r -p 'Choice [1-14]: ' action
 
     case "$action" in

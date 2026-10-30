@@ -210,8 +210,8 @@ copy_assets() {
     local -a defaults=(
       "openmrs/frontend/config-core_demo.json|/usr/share/nginx/html/config-core_demo.json"
       "openmrs/frontend/resources/favicon.ico|/usr/share/nginx/html/favicon.ico"
-      "openmrs/frontend/resources/nidan-logo-full.png|/usr/share/nginx/html/nidan-logo-full.png"
-      "openmrs/frontend/resources/nidan-logo-white.png|/usr/share/nginx/html/nidan-logo-white.png"
+      "openmrs/frontend/resources/clinicemr-logo.svg|/usr/share/nginx/html/clinicemr-logo.svg"
+      "openmrs/frontend/resources/clinicemr-logo-white.svg|/usr/share/nginx/html/clinicemr-logo-white.svg"
     )
     for mapping in "${defaults[@]}"; do
       src="${mapping%%|*}"; dst="${mapping#*|}"

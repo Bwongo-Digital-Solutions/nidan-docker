@@ -117,9 +117,9 @@ select_services() {
     for index in "${!service_names[@]}"; do
         if [[ "$operation" == "build" && "${service_buildable[$index]}" == "yes" ]]; then
             eligible_services+=("$index")
-        elif [[ "$operation" == "pull" && "${service_buildable[$index]}" != "yes" && -n "${service_images[$index]}" ]]; then
+        elif [[ "$operation" == "pull" && -n "${service_images[$index]}" ]]; then
             eligible_services+=("$index")
-        elif [[ "$operation" == "manage" ]]; then
+        elif [[ "$operation" == "start" || "$operation" == "manage" ]]; then
             eligible_services+=("$index")
         fi
     done
@@ -133,6 +133,7 @@ select_services() {
     case "$operation" in
         build) printf '\nServices with local build definitions in %s:\n' "$compose_file" ;;
         pull) printf '\nServices with images in %s:\n' "$compose_file" ;;
+        start) printf '\nSelect services to start (local builds and prebuilt images) in %s:\n' "$compose_file" ;;
         *) printf '\nSelect services in %s:\n' "$compose_file" ;;
     esac
 
@@ -215,39 +216,14 @@ start_minimum_core_api() {
 }
 
 sync_frontend_static_files() {
-    local container_id source_file container_path frontend_file
-    local -a frontend_files=(
-        "openmrs/frontend/config-core_demo.json:/usr/share/nginx/html/config-core_demo.json"
-        "openmrs/frontend/resources/favicon.ico:/usr/share/nginx/html/favicon.ico"
-        "openmrs/frontend/resources/clinicemr-logo.svg:/usr/share/nginx/html/clinicemr-logo.svg"
-        "openmrs/frontend/resources/clinicemr-logo-white.svg:/usr/share/nginx/html/clinicemr-logo-white.svg"
-    )
-
-    container_id="$(compose_all_profiles ps -q openmrs-frontend)"
-    if [[ -z "$container_id" ]] || [[ "$(docker inspect -f '{{.State.Running}}' "$container_id" 2>/dev/null)" != "true" ]]; then
-        printf 'The OpenMRS frontend container is not running. Start it before copying static files.\n' >&2
-        return 1
-    fi
-
-    for frontend_file in "${frontend_files[@]}"; do
-        source_file="${frontend_file%%:*}"
-        container_path="${frontend_file#*:}"
-        if [[ ! -f "$source_file" ]]; then
-            printf 'Cannot copy missing frontend file: %s\n' "$source_file" >&2
-            return 1
-        fi
-        docker cp "$source_file" "$container_id:$container_path"
-        printf 'Copied %s\n' "$source_file"
-    done
-
-    printf 'Static frontend files are updated in the running container. Refresh the browser to see the changes.\n'
+    bash "$SCRIPT_DIR/manage-services.sh" static-assets
 }
 
 while true; do
     printf '\nSelected stack: %s\n' "$compose_file"
     printf 'Choose an action:\n'
     printf '  1) Build selected services\n'
-    printf '  2) Build and start selected services\n'
+    printf '  2) Start selected services (build local services when needed; start prebuilt images as-is)\n'
     printf '  3) Pull selected prebuilt images\n'
     printf '  4) Build and start minimum Core EHR API\n'
     printf '  5) Start all services\n'
@@ -259,7 +235,7 @@ while true; do
     printf '  11) Restart selected services\n'
     printf '  12) Stop selected services\n'
     printf '  13) Show logs for selected services\n'
-    printf '  14) OpenMRS setup and operations\n'
+    printf '  14) OpenMRS and service-specific operations\n'
     printf '  15) Exit\n'
     read -r -p 'Choice [1-15]: ' action
 
@@ -270,8 +246,8 @@ while true; do
             fi
             ;;
         2)
-            if select_services build; then
-                compose up --build -d "${selected_services[@]}"
+            if select_services start; then
+                compose_all_profiles up --build -d "${selected_services[@]}"
             fi
             ;;
         3)
@@ -328,9 +304,9 @@ while true; do
             ;;
         14)
             if [[ "$compose_file" == "dev.docker-compose.yml" ]]; then
-                bash openmrs/manage-openmrs.sh --dev
+                bash manage-services.sh --dev
             else
-                bash openmrs/manage-openmrs.sh
+                bash manage-services.sh
             fi
             ;;
         15)

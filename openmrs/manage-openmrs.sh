@@ -41,6 +41,10 @@ openmrs_compose() { compose --profile openmrs "$@"; }
 
 service_has_build() {
   local service="$1"
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "python3 is required to inspect Compose build settings." >&2
+    return 1
+  fi
   compose config --format json | python3 -c 'import json,sys; name=sys.argv[1]; print("yes" if json.load(sys.stdin).get("services",{}).get(name,{}).get("build") else "no")' "$service"
 }
 
@@ -288,7 +292,7 @@ case "${1:-menu}" in
   diagnose|diagnostic) run_diagnostic ;;
   restart) restart_openmrs "${2:-openmrs-backend}" ;;
   *)
-    echo "Usage: $0 [--dev] {menu|build|db|backend|frontend|start|pull|status|logs [service]|diagnose|restart [service]}" >&2
+    echo "Usage: $0 [--dev] {menu|build|custom-modules|db|backend|frontend|start|pull|status|logs [service]|diagnose|restart [service]}" >&2
     exit 2
     ;;
 esac

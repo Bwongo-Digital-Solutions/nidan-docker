@@ -39,6 +39,11 @@ fi
 compose() { "${COMPOSE[@]}" -f "$COMPOSE_FILE" "$@"; }
 openmrs_compose() { compose --profile openmrs "$@"; }
 
+service_has_build() {
+  local service="$1"
+  compose config --format json | python3 -c 'import json,sys; name=sys.argv[1]; print("yes" if json.load(sys.stdin).get("services",{}).get(name,{}).get("build") else "no")' "$service"
+}
+
 require_service() {
   local wanted="$1" found
   found="$(compose config --services)"
@@ -121,8 +126,13 @@ build_custom_modules() {
 build_backend() {
   require_service openmrs-backend
   check_omods
-  echo "Building OpenMRS backend using $COMPOSE_FILE ..."
-  openmrs_compose build openmrs-backend
+  if [[ "$(service_has_build openmrs-backend)" == "yes" ]]; then
+    echo "Building OpenMRS backend using $COMPOSE_FILE ..."
+    openmrs_compose build openmrs-backend
+  else
+    echo "This Compose file uses a prebuilt OpenMRS backend image; pulling it instead of running a build."
+    openmrs_compose pull openmrs-backend
+  fi
 }
 
 start_database() {
@@ -136,8 +146,12 @@ start_backend() {
   require_service openmrs-backend
   require_service openmrs-db
   check_omods
-  echo "Building and starting OpenMRS backend. Compose waits for openmrs-db to become healthy."
-  openmrs_compose up --build -d openmrs-backend
+  echo "Starting OpenMRS backend. Compose waits for openmrs-db to become healthy."
+  if [[ "$(service_has_build openmrs-backend)" == "yes" ]]; then
+    openmrs_compose up --build -d openmrs-backend
+  else
+    openmrs_compose up -d openmrs-backend
+  fi
   echo "Backend startup can take 15–25 minutes while OpenMRS loads modules and Initializer metadata."
   echo "Follow progress with: $0 logs"
 }
@@ -157,7 +171,11 @@ start_openmrs() {
   require_service openmrs-frontend
   check_omods
   echo "Starting OpenMRS database, backend and frontend in dependency order."
-  openmrs_compose up --build -d openmrs-frontend
+  if [[ "$(service_has_build openmrs-backend)" == "yes" ]]; then
+    openmrs_compose up --build -d openmrs-frontend
+  else
+    openmrs_compose up -d openmrs-frontend
+  fi
   openmrs_compose ps openmrs-db openmrs-backend openmrs-frontend
 }
 

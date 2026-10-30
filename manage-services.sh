@@ -12,9 +12,12 @@ if [[ "${1:-}" == "--dev" ]]; then COMPOSE_FILE="dev.docker-compose.yml"; shift;
 command -v docker >/dev/null 2>&1 || { echo "Docker is required." >&2; exit 1; }
 command -v python3 >/dev/null 2>&1 || { echo "Python 3 is required." >&2; exit 1; }
 
-if docker compose version >/dev/null 2>&1; then COMPOSE=(docker compose)
-elif command -v docker-compose >/dev/null 2>&1; then COMPOSE=(docker-compose)
-else echo "Docker Compose is required." >&2; exit 1; fi
+# Require the Docker Compose v2 plugin; do not fall back to legacy docker-compose.
+COMPOSE=(docker compose)
+if ! "${COMPOSE[@]}" version >/dev/null 2>&1; then
+  echo "Docker Compose v2 plugin is unavailable. Install/enable it and verify with: docker compose version" >&2
+  exit 1
+fi
 
 compose() { "${COMPOSE[@]}" -f "$COMPOSE_FILE" "$@"; }
 # The standard stack uses named profiles; wildcard activates all services.

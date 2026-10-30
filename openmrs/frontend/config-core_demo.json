@@ -153,7 +153,7 @@
     "Brand color #3": "#0082A8",
     "Brand color #1": "#006D8F",
     "Brand color #2": "#003B5C",
-    "implementationName": "NidanEHR"
+    "implementationName": "ClinicEMR-EHR",
   },
   "@kenyaemr/esm-imaging-orders-app": {
     "radiologyConceptSetUuid": "cd9f116c-517d-439e-847d-d8d257434083",
@@ -187,14 +187,23 @@
         "fields": ["ethnicity", "bloodGroup"]
       }
     ],
-
+    "fieldConfigurations": {
+      "gender": [
+        {
+          "value": "male",
+          "label": "Male",
+          "display": "Male",
+          "name": "Male"
+        },
+        {
+          "value": "female",
+          "label": "Female",
+          "display": "Female",
+          "name": "Female"
+        }
+      ]
+    },
     "fieldDefinitions": [
-      {
-        "id": "ethnicity",
-        "type": "person attribute",
-        "uuid": "1d8b39ee-b95e-4822-a0d3-e1901dfa57b9",
-        "label": "Cast Details"
-      },
       {
         "id": "emergencyContact",
         "type": "person attribute",
@@ -414,8 +423,22 @@
     "logo": {
       "src": "${openmrsSpaBase}/clinicemr-logo-white.svg",
       "alt": "ClinicEMR-EHR"
-    }
+    },
+    "externalRefLinks": [
+      {
+        "title": "Contact Developer",
+        "redirect": "https://www.bwongo.site"
+      }
+    ]
   },
+  "@openmrs/esm-billing-app": {
+    "defaultCurrency": "UGX",
+    "country": "Uganda",
+    "logo": {
+      "src": "/openmrs/spa/billing-logo.jpg",
+      "alt": "UG" 
+    }
+  },  
   "@openmrs/esm-login-app": {
     "logo": {
       "src": "${openmrsSpaBase}/clinicemr-logo.svg",

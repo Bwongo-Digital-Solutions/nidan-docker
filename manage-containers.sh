@@ -226,7 +226,7 @@ sync_frontend_static_files() {
 while true; do
     printf '\nSelected stack: %s\n' "$compose_file"
     printf 'Choose an action:\n'
-    printf '  1) Build selected services\n'
+    printf '  1) Build selected services with local Compose build contexts\n'
     printf '  2) Start selected services (build local services when needed; start prebuilt images as-is)\n'
     printf '  3) Pull selected prebuilt images\n'
     printf '  4) Build and start minimum Core EHR API\n'
@@ -235,7 +235,7 @@ while true; do
     printf '  7) Remove containers\n'
     printf '  8) Show status\n'
     printf '  9) List all services and image sources\n'
-    printf '  10) Copy frontend static files without rebuilding\n'
+    printf '  10) Copy OpenMRS frontend assets/SPA into the running container (no rebuild)\n'
     printf '  11) Restart selected services\n'
     printf '  12) Stop selected services\n'
     printf '  13) Show logs for selected services\n'
@@ -246,7 +246,7 @@ while true; do
     case "$action" in
         1)
             if select_services build; then
-                compose build "${selected_services[@]}"
+                compose_all_profiles build "${selected_services[@]}"
             fi
             ;;
         2)
@@ -256,7 +256,7 @@ while true; do
             ;;
         3)
             if select_services pull; then
-                compose pull "${selected_services[@]}"
+                compose_all_profiles pull "${selected_services[@]}"
             fi
             ;;
         4)

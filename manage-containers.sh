@@ -10,12 +10,11 @@ if ! command -v docker >/dev/null 2>&1; then
     exit 1
 fi
 
-if docker compose version >/dev/null 2>&1; then
-    COMPOSE_COMMAND=(docker compose)
-elif command -v docker-compose >/dev/null 2>&1; then
-    COMPOSE_COMMAND=(docker-compose)
-else
-    printf 'Error: Docker Compose is unavailable. Install the Docker Compose plugin or docker-compose.\n' >&2
+# This project requires the Docker Compose v2 plugin. The legacy
+# standalone docker-compose executable is intentionally not supported.
+COMPOSE_COMMAND=(docker compose)
+if ! "${COMPOSE_COMMAND[@]}" version >/dev/null 2>&1; then
+    printf 'Error: Docker Compose v2 plugin is unavailable. Install/enable it and verify with: docker compose version\n' >&2
     exit 1
 fi
 

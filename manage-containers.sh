@@ -259,8 +259,9 @@ while true; do
     printf '  11) Restart selected services\n'
     printf '  12) Stop selected services\n'
     printf '  13) Show logs for selected services\n'
-    printf '  14) Exit\n'
-    read -r -p 'Choice [1-14]: ' action
+    printf '  14) OpenMRS setup and operations\n'
+    printf '  15) Exit\n'
+    read -r -p 'Choice [1-15]: ' action
 
     case "$action" in
         1)
@@ -326,6 +327,14 @@ while true; do
             fi
             ;;
         14)
+            if [[ -x openmrs/manage-openmrs.sh ]]; then
+                ./openmrs/manage-openmrs.sh
+            else
+                printf 'OpenMRS helper is missing or not executable: openmrs/manage-openmrs.sh\\n' >&2
+                printf 'Run: chmod +x openmrs/manage-openmrs.sh\\n'
+            fi
+            ;;
+        15)
             exit 0
             ;;
         *)

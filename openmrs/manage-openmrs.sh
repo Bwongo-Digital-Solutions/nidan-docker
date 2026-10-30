@@ -61,6 +61,63 @@ check_omods() {
   fi
 }
 
+build_custom_modules() {
+  local source_root="${OPENMRS_BACKEND_DIR:-../openmrs-backend}"
+  local module dir artifact built=0 missing=0
+  local -a modules=(
+    openmrs-module-fhir2
+    openmrs-module-medication-administration
+    openmrs-module-bahmni-ipd
+    openmrs-module-attachments
+    openmrs-module-communication
+    openmrs-module-appointments
+    openmrs-module-orderexpansion
+    openmrs-module-nidancore
+  )
+
+  if ! command -v mvn >/dev/null 2>&1; then
+    echo "Maven (mvn) is required to build custom OMODs." >&2
+    return 1
+  fi
+  if [[ ! -d "$source_root" ]]; then
+    echo "OpenMRS backend source repository not found: $source_root" >&2
+    echo "Set OPENMRS_BACKEND_DIR to its location, or clone it beside nidan-docker." >&2
+    return 1
+  fi
+
+  mkdir -p openmrs/custom_modules
+  echo "Building available custom modules from $source_root"
+  echo "Build order follows the Nidan notes: FHIR2 -> medication-administration -> IPD, then the remaining modules."
+
+  for module in "${modules[@]}"; do
+    dir="$source_root/$module"
+    if [[ ! -f "$dir/pom.xml" ]]; then
+      echo "SKIP (source not present): $module"
+      ((missing+=1))
+      continue
+    fi
+
+    echo
+    echo "=== Building $module ==="
+    (cd "$dir" && mvn package -DskipTests)
+
+    mapfile -t artifacts < <(find "$dir" -type f -path '*/target/*.omod' -print)
+    if (("${#artifacts[@]}" == 0)); then
+      echo "ERROR: Maven completed but no .omod artifact was found for $module." >&2
+      return 1
+    fi
+    for artifact in "${artifacts[@]}"; do
+      cp -f "$artifact" openmrs/custom_modules/
+      echo "Installed: openmrs/custom_modules/$(basename "$artifact")"
+      ((built+=1))
+    done
+  done
+
+  echo
+  echo "Custom module build complete: $built OMOD artifact(s) copied; $missing module source folder(s) skipped."
+  echo "Next step: choose 'Build OpenMRS backend' so the Docker image includes these OMODs."
+}
+
 build_backend() {
   require_service openmrs-backend
   check_omods
@@ -164,34 +221,36 @@ menu() {
 
 NIDAN OPENMRS OPERATIONS
   1) Build OpenMRS backend
-  2) Start OpenMRS database only
-  3) Build and start OpenMRS backend (database dependency included)
-  4) Start OpenMRS frontend
-  5) Start complete OpenMRS (database + backend + frontend)
-  6) Pull OpenMRS images
-  7) Show OpenMRS status/health
-  8) Follow OpenMRS backend logs
-  9) Follow OpenMRS frontend logs
- 10) Run Initializer/configuration diagnostic
- 11) Restart OpenMRS backend
- 12) Restart OpenMRS frontend
- 13) Exit
+  2) Build custom OMODs from ../openmrs-backend
+  3) Start OpenMRS database only
+  4) Build and start OpenMRS backend (database dependency included)
+  5) Start OpenMRS frontend
+  6) Start complete OpenMRS (database + backend + frontend)
+  7) Pull OpenMRS images
+  8) Show OpenMRS status/health
+  9) Follow OpenMRS backend logs
+ 10) Follow OpenMRS frontend logs
+ 11) Run Initializer/configuration diagnostic
+ 12) Restart OpenMRS backend
+ 13) Restart OpenMRS frontend
+ 14) Exit
 MENU
-    read -r -p "Select [1-13]: " choice
+    read -r -p "Select [1-14]: " choice
     case "$choice" in
       1) build_backend ;;
-      2) start_database ;;
-      3) start_backend ;;
-      4) start_frontend ;;
-      5) start_openmrs ;;
-      6) pull_openmrs_images ;;
-      7) show_status ;;
-      8) show_logs openmrs-backend ;;
-      9) show_logs openmrs-frontend ;;
-      10) run_diagnostic ;;
-      11) restart_openmrs openmrs-backend ;;
-      12) restart_openmrs openmrs-frontend ;;
-      13) return 0 ;;
+      2) build_custom_modules ;;
+      3) start_database ;;
+      4) start_backend ;;
+      5) start_frontend ;;
+      6) start_openmrs ;;
+      7) pull_openmrs_images ;;
+      8) show_status ;;
+      9) show_logs openmrs-backend ;;
+      10) show_logs openmrs-frontend ;;
+      11) run_diagnostic ;;
+      12) restart_openmrs openmrs-backend ;;
+      13) restart_openmrs openmrs-frontend ;;
+      14) return 0 ;;
       *) echo "Invalid choice." ;;
     esac
   done
@@ -200,6 +259,7 @@ MENU
 case "${1:-menu}" in
   menu) menu ;;
   build) build_backend ;;
+  custom-modules|build-modules) build_custom_modules ;;
   db) start_database ;;
   backend|start-backend) start_backend ;;
   frontend|start-frontend) start_frontend ;;

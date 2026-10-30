@@ -216,7 +216,11 @@ start_minimum_core_api() {
 }
 
 sync_frontend_static_files() {
-    bash "$SCRIPT_DIR/manage-services.sh" static-assets
+    if [[ "$compose_file" == "dev.docker-compose.yml" ]]; then
+        bash "$SCRIPT_DIR/manage-services.sh" --dev static-assets
+    else
+        bash "$SCRIPT_DIR/manage-services.sh" static-assets
+    fi
 }
 
 while true; do

@@ -98,6 +98,17 @@ build_openmrs_backend() {
   echo "Starting OpenMRS backend; Compose will start its database dependency as needed."
   compose_all up -d openmrs-backend
 }
+assemble_openmrs_frontend() {
+  [[ -f openmrs/frontend/spa-build-config.json ]] || { echo "Missing openmrs/frontend/spa-build-config.json." >&2; return 1; }
+  echo "Running the documented manual OpenMRS SPA assembly in Node 20."
+  docker run --rm -it \
+    -v "$ROOT_DIR/openmrs/frontend:/app" \
+    -w /app \
+    node:20-alpine \
+    /bin/sh -c 'npm install -g openmrs@next && cp spa-build-config.json spa-assemble-config.json && npx openmrs assemble --manifest --mode config --config spa-assemble-config.json --target ./spa'
+  echo "SPA assembly output: openmrs/frontend/spa"
+  echo "Use the static-asset copy option to copy it into a running openmrs-frontend container without rebuilding."
+}
 build_openmrs_frontend() {
   require_service openmrs-frontend
   local image
@@ -281,16 +292,17 @@ NIDAN EHR - SERVICE BUILD & OPERATIONS
   4) Build OpenMRS backend and start it
   5) Build custom OpenMRS OMOD modules (FHIR2 -> medication-administration -> IPD)
   6) Build Nidan OpenMRS frontend SPA image
-  7) Copy static files or the built SPA into a running container (no rebuild)
-  8) Run OpenMRS Initializer diagnostic
-  9) Pull an image for a selected service
- 10) Show status/health for all services
- 11) Follow logs for a service
- 12) Restart a service
- 13) Start all services, including optional profiles
- 14) Exit
+  7) Assemble OpenMRS SPA manually with Node 20 (host output)
+  8) Copy static files or the built SPA into a running container (no rebuild)
+  9) Run OpenMRS Initializer diagnostic
+ 10) Pull an image for a selected service
+ 11) Show status/health for all services
+ 12) Follow logs for a service
+ 13) Restart a service
+ 14) Start all services, including optional profiles
+ 15) Exit
 MENU
-    read -r -p 'Choice [1-14]: ' choice
+    read -r -p 'Choice [1-15]: ' choice
     case "$choice" in
       1) list_services ;;
       2) select_service "Select service to build:" && build_service "$SELECTED_SERVICE" ;;
@@ -298,14 +310,15 @@ MENU
       4) build_openmrs_backend ;;
       5) build_custom_modules ;;
       6) build_openmrs_frontend ;;
-      7) copy_assets ;;
-      8) openmrs_diagnostic ;;
-      9) select_service "Select service image to pull:" && pull_service "$SELECTED_SERVICE" ;;
-      10) status_all ;;
-      11) logs_service ;;
-      12) restart_service ;;
-      13) compose_all up -d ;;
-      14) return 0 ;;
+      7) assemble_openmrs_frontend ;;
+      8) copy_assets ;;
+      9) openmrs_diagnostic ;;
+      10) select_service "Select service image to pull:" && pull_service "$SELECTED_SERVICE" ;;
+      11) status_all ;;
+      12) logs_service ;;
+      13) restart_service ;;
+      14) compose_all up -d ;;
+      15) return 0 ;;
       *) echo "Invalid choice." ;;
     esac
   done
@@ -317,6 +330,7 @@ case "${1:-menu}" in
   start|up) start_service "${2:?Usage: $0 start SERVICE}" ;;
   build-openmrs-backend) build_openmrs_backend ;;
   build-openmrs-frontend|build-frontend) build_openmrs_frontend ;;
+  assemble-openmrs-frontend|assemble-frontend) assemble_openmrs_frontend ;;
   build-odoo|build-odoo-base) build_odoo_base ;;
   custom-modules|build-modules) build_custom_modules ;;
   copy-assets|static-assets) copy_assets "${2:-}" ;;
@@ -326,7 +340,7 @@ case "${1:-menu}" in
   restart) restart_service "${2:-}" ;;
   diagnose|diagnostic) openmrs_diagnostic ;;
   *)
-    echo "Usage: $0 [--dev] {menu|list|build SERVICE|start SERVICE|build-openmrs-backend|build-openmrs-frontend|build-odoo|custom-modules|copy-assets [SERVICE]|pull SERVICE|status|logs [SERVICE]|restart [SERVICE]|diagnose}" >&2
+    echo "Usage: $0 [--dev] {menu|list|build SERVICE|start SERVICE|build-openmrs-backend|build-openmrs-frontend|assemble-openmrs-frontend|build-odoo|custom-modules|copy-assets [SERVICE]|pull SERVICE|status|logs [SERVICE]|restart [SERVICE]|diagnose}" >&2
     exit 2
     ;;
 esac

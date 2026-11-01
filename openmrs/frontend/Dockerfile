@@ -111,5 +111,12 @@ COPY config-core_demo.json /usr/share/nginx/html
 COPY /resources/favicon.ico /usr/share/nginx/html/favicon.ico
 COPY /resources/clinicemr-logo.svg /usr/share/nginx/html
 COPY /resources/clinicemr-logo-white.svg /usr/share/nginx/html
+COPY /resources/billing-logo.jpg /usr/share/nginx/html/billing-logo.jpg
+
+# The repository's legacy favicon.ico contains SVG text, not an ICO binary.
+# Keep the actual SVG asset and point the generated SPA document at it.
+RUN if [ -f /usr/share/nginx/html/index.html ]; then \
+      sed -i 's|/openmrs/favicon.ico|/openmrs/spa/clinicemr-logo.svg|g; s|/favicon.ico|/clinicemr-logo.svg|g' /usr/share/nginx/html/index.html; \
+    fi
 
 CMD ["/usr/local/bin/startup.sh"]

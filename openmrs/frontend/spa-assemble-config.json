@@ -49,8 +49,7 @@
     "@openmrs/esm-system-admin-app": "4.3.0",
     "@openmrs/esm-user-onboarding-app": "4.0.1-pre.592",
     "@trigonal/esm-ward-app": "trigonal-esm-ward-app-1.0.0.tgz",
-    "@trigonal/esm-ipd-app": "trigonal-esm-ipd-app-1.0.0.tgz",
-    "@nidan/esm-nepali-calendar": "nidan-esm-nepali-calendar-1.0.0.tgz"
+    "@trigonal/esm-ipd-app": "trigonal-esm-ipd-app-1.0.0.tgz"
   },
   "excludedFrontendModules": []
 }

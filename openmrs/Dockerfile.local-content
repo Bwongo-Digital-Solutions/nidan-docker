@@ -59,10 +59,10 @@ RUN --mount=type=cache,target=/root/.m2 \
     cp -R /openmrs_distro/distro/target/sdk-distro/web/openmrs_owas /openmrs/distribution/openmrs_owas/ && \
     cp -R /openmrs_distro/distro/target/sdk-distro/web/openmrs_config /openmrs/distribution/openmrs_config/ && \
     cp -R /tmp/openmrs-content-referenceapplication-demo/configuration/* /openmrs/distribution/openmrs_config/ && \
-    mkdir -p /openmrs/distribution/openmrs_config/backend_configuration /openmrs/distribution/openmrs_config/shared_configuration && \\
-    rm -rf /openmrs/distribution/openmrs_config/backend_configuration/addresshierarchy && \\
-    cp -R /tmp/uganda-content/backend_configuration/. /openmrs/distribution/openmrs_config/backend_configuration/ && \\
-    cp -R /tmp/uganda-content/shared_configuration/. /openmrs/distribution/openmrs_config/shared_configuration/ && \\
+    mkdir -p /openmrs/distribution/openmrs_config/backend_configuration /openmrs/distribution/openmrs_config/shared_configuration && \
+    rm -rf /openmrs/distribution/openmrs_config/backend_configuration/addresshierarchy && \
+    cp -R /tmp/uganda-content/backend_configuration/. /openmrs/distribution/openmrs_config/backend_configuration/ && \
+    cp -R /tmp/uganda-content/shared_configuration/. /openmrs/distribution/openmrs_config/shared_configuration/ && \
     rm -rf /tmp/openmrs-content-referenceapplication-demo && \
     \
     mvn $MVN_ARGS_SETTINGS -T 1C clean

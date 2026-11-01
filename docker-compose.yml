@@ -92,7 +92,10 @@ services:
       # 8 GiB Docker VM shared by the rest of the Nidan stack.
       OMRS_JAVA_MEMORY_OPTS: "${OMRS_JAVA_MEMORY_OPTS:--Xmx1536m -Xms512m -XX:MaxMetaspaceSize=512m}"
       # JVM (optional overrides)
-      _JAVA_OPTIONS: "-Dcsrf.enabled=false"
+      # Uganda timezone is applied to JVM date handling and the container clock.
+      OPENMRS_TIMEZONE: ${OPENMRS_TIMEZONE:-Africa/Kampala}
+      TZ: ${OPENMRS_TIMEZONE:-Africa/Kampala}
+      _JAVA_OPTIONS: "-Dcsrf.enabled=false -Duser.timezone=${OPENMRS_TIMEZONE:-Africa/Kampala}"
       # Nidan paywall → Odoo payment-status API (read by nidancore via System.getenv;
       # no openmrs-runtime.properties edit / startup.sh patch needed).
       NIDANCORE_ODOO_URL: ${NIDANCORE_ODOO_URL:-http://odoo:8069}
@@ -120,9 +123,7 @@ services:
     # build:
     #   context: ./openmrs/frontend
     #   dockerfile: Dockerfile
-    #   args:
-    #     NIDAN_CALENDAR_BUNDLE: "1.0.0-v9"   # bump after repacking the tgz
-    # Vanilla upstream SPA (no BS calendar): dockerfile: Dockerfile.vanilla
+    # The standard SPA build uses the Gregorian calendar and en-GB locale.
     profiles: ["openmrs","nidanehr-standard"]
     image: trigonaltechnology/openmrs-frontend:latest
     container_name: nidan-openmrs-frontend
@@ -395,7 +396,7 @@ services:
         condition: service_healthy
     environment:
       - DEFAULT_PW=${OPENELIS_DEFAULT_ADMIN_PASSWORD:-adminADMIN!}
-      - TZ=${OPENELIS_TZ:-UTC}
+      - TZ=${OPENELIS_TZ:-Africa/Kampala}
       # JVM system properties injected into Tomcat via CATALINA_OPTS.
       # Each -D flag maps 1:1 to a property key in common.properties.
       # Groups: database | middleware sync | nidan test order | nidan paywall | nidan cis retry
@@ -810,7 +811,7 @@ services:
       # Connection settings
       - DB_CONNECT_TIMEOUT=${DHIS2_DB_CONNECT_TIMEOUT:-10}
       - DB_DATE_OVERLAP_BUFFER_DAYS=${DHIS2_DB_DATE_OVERLAP_BUFFER_DAYS:-2}
-      # Federal HMIS (Nepal)
+      # National HMIS/DHIS2 endpoint (configure credentials and organisation unit for the deployment country).
       - FEDERAL_HMIS_URL=${FEDERAL_HMIS_URL}
       - FEDERAL_HMIS_USERNAME=${FEDERAL_HMIS_USERNAME}
       - FEDERAL_HMIS_PASSWORD=${FEDERAL_HMIS_PASSWORD}

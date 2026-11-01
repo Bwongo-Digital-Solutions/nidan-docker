@@ -8,15 +8,17 @@ on:
   push:
     branches:
       - dev
+      - dev-clinicemr
       - main
     paths:
       - 'openmrs/frontend/**'
-#  pull_request:
-#    branches:
-#      - dev
-#      - main
-#    paths:
-#      - 'openmrs/frontend/**'
+  pull_request:
+    branches:
+      - dev
+      - dev-clinicemr
+      - main
+    paths:
+      - 'openmrs/frontend/**'
 
 concurrency:
   group: openmrs-frontend-${{ github.ref }}
@@ -45,7 +47,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
-        # if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -58,7 +60,8 @@ jobs:
         with:
           images: ${{ env.IMAGE_BASE }}/openmrs-frontend
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' || github.base_ref == 'dev' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/dev-clinicemr' || github.base_ref == 'dev' || github.base_ref == 'dev-clinicemr' }}
+            type=ref,event=pr
             type=raw,value=stable,enable=${{ github.ref == 'refs/heads/main' || github.base_ref == 'main' }}
 
       - name: Build and push Docker image
@@ -67,7 +70,7 @@ jobs:
           context: openmrs/frontend
           file: openmrs/frontend/Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: true # push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=openmrs-frontend

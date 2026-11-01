@@ -2,8 +2,10 @@
   "spaPath": "$SPA_PATH",
   "apiUrl": "$API_URL",
   "pageTitle": "NidanEHR-Clinical",
-  "configUrls": ["$SPA_CONFIG_URLS"],
-  "defaultLocale": "$SPA_DEFAULT_LOCALE",
+  "configUrls": [
+    "$SPA_CONFIG_URLS"
+  ],
+  "defaultLocale": "en-GB",
   "importmap": "$SPA_PATH/importmap.json",
   "routes": "$SPA_PATH/routes.registry.json",
   "supportOffline": false

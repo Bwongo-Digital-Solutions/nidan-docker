@@ -153,7 +153,9 @@
     "Brand color #3": "#0082A8",
     "Brand color #1": "#006D8F",
     "Brand color #2": "#003B5C",
-    "implementationName": "ClinicEMR-EHR"},
+    "implementationName": "ClinicEMR-EHR",
+    "preferredCalendar": {"en": "gregory", "en-GB": "gregory"},
+    "preferredDateLocale": {"en": "en-GB", "en-GB": "en-GB"}},
   "@kenyaemr/esm-imaging-orders-app": {
     "radiologyConceptSetUuid": "cd9f116c-517d-439e-847d-d8d257434083",
     "orders": {
@@ -310,16 +312,12 @@
         "162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
       ]
     },
-    "hospitalName": "Bhalubang Hospital",
-    "hospitalAddress": "Bhalubang, Dang",
+    "hospitalName": "NidanEHR",
+    "hospitalAddress": "",
     "hospitalContactInfo": "",
-    "hospitalLetterheadTopLines": [
-      "Lumbini province government",
-      "Ministry of health",
-      "health directorate"
-    ],
+    "hospitalLetterheadTopLines": [],
     "hospitalLetterheadBottomLines": [],
-    "printLetterhead": true,
+    "printLetterhead": false,
     "patientSummaryDocument": {
       "excludeObsForms": [
         "55fcfbee-6510-3abb-b2da-dbd0d5353b2e",

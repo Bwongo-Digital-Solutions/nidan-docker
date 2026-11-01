@@ -18,7 +18,7 @@ RUN apk add --no-cache git && \
 ### UgandaEMR content package stage
 FROM alpine:3.19 AS uganda-content-clone
 ARG UGANDA_CONTENT_REPO_URL="https://github.com/METS-Programme/openmrs-content-ugandaemrcorepack.git"
-ARG UGANDA_CONTENT_REPO_REF="main"
+ARG UGANDA_CONTENT_REPO_REF="58f29646675db3db2db2db1bc50f7cf3a6c1d36c"
 RUN apk add --no-cache git && \\
     git clone --depth 1 --branch "${UGANDA_CONTENT_REPO_REF}" "${UGANDA_CONTENT_REPO_URL}" /uganda-content
 
@@ -38,6 +38,9 @@ COPY custom_modules /openmrs_distro/custom_modules/
 
 # Copy cloned content
 COPY --from=content-clone /content /tmp/openmrs-content-referenceapplication-demo
+COPY --from=uganda-content-clone /uganda-content/configuration/backend_configuration /tmp/uganda-content/backend_configuration
+COPY --from=uganda-content-clone /uganda-content/configuration/shared_configuration /tmp/uganda-content/shared_configuration
+COPY configuration/backend_configuration/globalproperties /tmp/nidan-globalproperties
 
 # Build: install custom OMODs → build content → build distro → copy artifacts → overlay config
 RUN \

@@ -41,8 +41,16 @@ separately during clinical acceptance testing.
 From the Nidan Docker repository root:
 
 ```bash
-docker compose --profile nidanehr-standard build openmrs-backend openmrs-frontend
+# Build the backend image from the Nidan OpenMRS Dockerfile
+docker compose --profile nidanehr-standard build openmrs-backend
+
+# Build the frontend image (the Compose service uses this image tag)
+docker build -t trigonaltechnology/openmrs-frontend:latest ./openmrs/frontend
 ```
+
+The backend and frontend GitHub Actions build their respective images for pull
+requests targeting `dev-clinicemr`, `dev`, or `main`. They publish images only
+for branch pushes, not pull requests.
 
 Back up the OpenMRS database and `openmrs-data` volume before deploying this
 change to an existing installation. The Uganda address hierarchy and metadata

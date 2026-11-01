@@ -6,6 +6,13 @@
 # Use with: docker-compose -f docker-compose.yml -f docker-compose.openmrs-local-content.yml build openmrs-backend
 # Build context MUST be repo root (parent of nidan-docker).
 
+### UgandaEMR content package stage
+FROM alpine:3.19 AS uganda-content-clone
+ARG UGANDA_CONTENT_REPO_URL="https://github.com/METS-Programme/openmrs-content-ugandaemrcorepack.git"
+ARG UGANDA_CONTENT_REPO_REF="main"
+RUN apk add --no-cache git && \\
+    git clone --depth 1 --branch "${UGANDA_CONTENT_REPO_REF}" "${UGANDA_CONTENT_REPO_URL}" /uganda-content
+
 ### Dev stage (build) - no content-clone; use local content
 FROM openmrs/openmrs-core:2.8.x-dev-amazoncorretto-21 AS dev
 WORKDIR /openmrs_distro
@@ -22,6 +29,8 @@ COPY nidan-docker/openmrs/custom_modules /openmrs_distro/custom_modules/
 
 # Copy LOCAL content (includes liquibase fixes)
 COPY openmrs-backend/openmrs-content-referenceapplication-demo /tmp/openmrs-content-referenceapplication-demo
+COPY --from=uganda-content-clone /uganda-content/configuration/backend_configuration /tmp/uganda-content/backend_configuration
+COPY --from=uganda-content-clone /uganda-content/configuration/shared_configuration /tmp/uganda-content/shared_configuration
 
 # Build: install custom OMODs → build content → build distro → copy artifacts
 # --mount=type=cache: Maven .m2 cache persists between builds (requires DOCKER_BUILDKIT=1)
@@ -50,6 +59,10 @@ RUN --mount=type=cache,target=/root/.m2 \
     cp -R /openmrs_distro/distro/target/sdk-distro/web/openmrs_owas /openmrs/distribution/openmrs_owas/ && \
     cp -R /openmrs_distro/distro/target/sdk-distro/web/openmrs_config /openmrs/distribution/openmrs_config/ && \
     cp -R /tmp/openmrs-content-referenceapplication-demo/configuration/* /openmrs/distribution/openmrs_config/ && \
+    mkdir -p /openmrs/distribution/openmrs_config/backend_configuration /openmrs/distribution/openmrs_config/shared_configuration && \\
+    rm -rf /openmrs/distribution/openmrs_config/backend_configuration/addresshierarchy && \\
+    cp -R /tmp/uganda-content/backend_configuration/. /openmrs/distribution/openmrs_config/backend_configuration/ && \\
+    cp -R /tmp/uganda-content/shared_configuration/. /openmrs/distribution/openmrs_config/shared_configuration/ && \\
     rm -rf /tmp/openmrs-content-referenceapplication-demo && \
     \
     mvn $MVN_ARGS_SETTINGS -T 1C clean

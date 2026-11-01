@@ -13,6 +13,7 @@ on:
       - main
     paths:
       - 'openmrs/**'
+      - 'dev.uganda.docker-compose.yml'
       - '!openmrs/frontend/**'
   pull_request:
     branches:
@@ -42,6 +43,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Validate Uganda development Compose overlay
+        run: docker compose -f dev.docker-compose.yml -f dev.uganda.docker-compose.yml config --quiet
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

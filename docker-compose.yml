@@ -123,7 +123,7 @@ services:
     # build:
     #   context: ./openmrs/frontend
     #   dockerfile: Dockerfile
-    # The standard SPA build uses the Gregorian calendar and en-GB locale; no Nepal calendar bundle is required.
+    # The standard SPA build uses the Gregorian calendar and en-GB locale.
     profiles: ["openmrs","nidanehr-standard"]
     image: trigonaltechnology/openmrs-frontend:latest
     container_name: nidan-openmrs-frontend

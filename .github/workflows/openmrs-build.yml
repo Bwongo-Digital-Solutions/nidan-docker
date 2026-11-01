@@ -22,6 +22,7 @@ on:
       - main
     paths:
       - 'openmrs/**'
+      - 'dev.uganda.docker-compose.yml'
       - '!openmrs/frontend/**'
 
 concurrency:

@@ -141,7 +141,8 @@ echo "Writing out $TOMCAT_SETENV_FILE file"
 
 JAVA_OPTS="$OMRS_JAVA_SERVER_OPTS"
 # Override Hibernate Search to avoid blocking on es:9200 (no ES in stack) - JVM -D takes precedence
-CATALINA_OPTS="${OMRS_JAVA_MEMORY_OPTS} -DOPENMRS_INSTALLATION_SCRIPT=${OMRS_SERVER_PROPERTIES_FILE} -DOPENMRS_APPLICATION_DATA_DIRECTORY=${OMRS_DATA_DIR}/ -Dhibernate.search.backend.uris= -Dhibernate.search.backend.discovery.enabled=false"
+OPENMRS_TIMEZONE="${OPENMRS_TIMEZONE:-Africa/Kampala}"
+CATALINA_OPTS="${OMRS_JAVA_MEMORY_OPTS} -Duser.timezone=${OPENMRS_TIMEZONE} -DOPENMRS_INSTALLATION_SCRIPT=${OMRS_SERVER_PROPERTIES_FILE} -DOPENMRS_APPLICATION_DATA_DIRECTORY=${OMRS_DATA_DIR}/ -Dhibernate.search.backend.uris= -Dhibernate.search.backend.discovery.enabled=false"
 
 if [ -n "${OMRS_DEV_DEBUG_PORT-}" ]; then
   echo "Enabling debugging on port ${OMRS_DEV_DEBUG_PORT}"

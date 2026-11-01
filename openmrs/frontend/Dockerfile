@@ -57,8 +57,6 @@ RUN yarn add ./openmrs-esm-login-app-10.0.0-nidan.tgz
 RUN yarn add ./openmrs-esm-odontogram-app-1.0.0.tgz
 RUN yarn add ./openmrs-esm-primary-navigation-app-10.0.0.tgz
 
-RUN echo "nidan-calendar-bundle=${NIDAN_CALENDAR_BUNDLE}" && \
-    yarn add ./nidan-esm-nepali-calendar-1.0.0.tgz
 
 # openmrs CLI must live in /app/node_modules (not npx cache) so patches apply to the same tree `openmrs build` uses.
 RUN yarn add openmrs@${APP_SHELL_VERSION:-10.0.0} --legacy-peer-deps

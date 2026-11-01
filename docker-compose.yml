@@ -396,7 +396,7 @@ services:
         condition: service_healthy
     environment:
       - DEFAULT_PW=${OPENELIS_DEFAULT_ADMIN_PASSWORD:-adminADMIN!}
-      - TZ=${OPENELIS_TZ:-UTC}
+      - TZ=${OPENELIS_TZ:-Africa/Kampala}
       # JVM system properties injected into Tomcat via CATALINA_OPTS.
       # Each -D flag maps 1:1 to a property key in common.properties.
       # Groups: database | middleware sync | nidan test order | nidan paywall | nidan cis retry

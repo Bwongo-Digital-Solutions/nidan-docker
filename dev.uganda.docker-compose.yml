@@ -12,16 +12,16 @@ services:
       dockerfile: Dockerfile
     image: nidan/openmrs-backend:uganda-dev
     environment:
-      OMRS_DB: mysql
-      OMRS_DB_HOSTNAME: openmrs-db
-      OMRS_DB_PORT: "3306"
-      OMRS_DB_URL: jdbc:mysql://openmrs-db:3306/${OPENMRS_DB_NAME:-openmrs}?useUnicode=true&characterEncoding=UTF-8&sessionVariables=storage_engine=InnoDB
-      OMRS_DB_USERNAME: ${OPENMRS_DB_USER:-openmrs}
-      OMRS_DB_PASSWORD: ${OPENMRS_DB_PASSWORD:-openmrs}
-      OMRS_CONFIG_MODULE_WEB_ADMIN: "true"
-      OMRS_CONFIG_AUTO_UPDATE_DATABASE: "true"
-      OMRS_CONFIG_CREATE_TABLES: "true"
-      OMRS_CONFIG_HAS_CURRENT_OPENMRS_DATABASE: "true"
-      OPENMRS_TIMEZONE: ${OPENMRS_TIMEZONE:-Africa/Kampala}
-      TZ: ${OPENMRS_TIMEZONE:-Africa/Kampala}
-      OMRS_JAVA_MEMORY_OPTS: ${OMRS_JAVA_MEMORY_OPTS:--Xmx1536m -Xms512m -XX:MaxMetaspaceSize=512m}
+      - OMRS_DB=mysql
+      - OMRS_DB_HOSTNAME=openmrs-db
+      - OMRS_DB_PORT=3306
+      - OMRS_DB_URL=jdbc:mysql://openmrs-db:3306/${OPENMRS_DB_NAME:-openmrs}?useUnicode=true&characterEncoding=UTF-8&sessionVariables=storage_engine=InnoDB
+      - OMRS_DB_USERNAME=${OPENMRS_DB_USER:-openmrs}
+      - OMRS_DB_PASSWORD=${OPENMRS_DB_PASSWORD:-openmrs}
+      - OMRS_CONFIG_MODULE_WEB_ADMIN=true
+      - OMRS_CONFIG_AUTO_UPDATE_DATABASE=true
+      - OMRS_CONFIG_CREATE_TABLES=true
+      - OMRS_CONFIG_HAS_CURRENT_OPENMRS_DATABASE=true
+      - OPENMRS_TIMEZONE=${OPENMRS_TIMEZONE:-Africa/Kampala}
+      - TZ=${OPENMRS_TIMEZONE:-Africa/Kampala}
+      - OMRS_JAVA_MEMORY_OPTS=${OMRS_JAVA_MEMORY_OPTS:--Xmx1536m -Xms512m -XX:MaxMetaspaceSize=512m}

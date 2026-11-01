@@ -108,7 +108,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY --from=dev /app/spa /usr/share/nginx/html
 COPY config-core_demo.json /usr/share/nginx/html
 
-COPY /resources/favicon.ico /usr/share/nginx/html/favicon.ico
 COPY /resources/clinicemr-logo.svg /usr/share/nginx/html
 COPY /resources/clinicemr-logo-white.svg /usr/share/nginx/html
 COPY /resources/billing-logo.jpg /usr/share/nginx/html/billing-logo.jpg

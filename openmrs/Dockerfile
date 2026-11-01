@@ -15,6 +15,13 @@ RUN apk add --no-cache git && \
     echo "CACHE_BUST=${CACHE_BUST}" >/dev/null && \
     git clone --depth 1 --branch "${CONTENT_REPO_REF}" "${CONTENT_REPO_URL}" /content
 
+### UgandaEMR content package stage
+FROM alpine:3.19 AS uganda-content-clone
+ARG UGANDA_CONTENT_REPO_URL="https://github.com/METS-Programme/openmrs-content-ugandaemrcorepack.git"
+ARG UGANDA_CONTENT_REPO_REF="main"
+RUN apk add --no-cache git && \\
+    git clone --depth 1 --branch "${UGANDA_CONTENT_REPO_REF}" "${UGANDA_CONTENT_REPO_URL}" /uganda-content
+
 ### Dev stage (build)
 FROM openmrs/openmrs-core:2.8.x-dev-amazoncorretto-21 AS dev
 WORKDIR /openmrs_distro
@@ -51,6 +58,10 @@ RUN \
     cp -R /openmrs_distro/distro/target/sdk-distro/web/openmrs_owas /openmrs/distribution/openmrs_owas/ && \
     cp -R /openmrs_distro/distro/target/sdk-distro/web/openmrs_config /openmrs/distribution/openmrs_config/ && \
     cp -R /tmp/openmrs-content-referenceapplication-demo/configuration/* /openmrs/distribution/openmrs_config/ && \
+    mkdir -p /openmrs/distribution/openmrs_config/backend_configuration /openmrs/distribution/openmrs_config/shared_configuration && \\
+    rm -rf /openmrs/distribution/openmrs_config/backend_configuration/addresshierarchy && \\
+    cp -R /uganda-content/configuration/backend_configuration/. /openmrs/distribution/openmrs_config/backend_configuration/ && \\
+    cp -R /uganda-content/configuration/shared_configuration/. /openmrs/distribution/openmrs_config/shared_configuration/ && \\
     rm -rf /tmp/openmrs-content-referenceapplication-demo && \
     \
     mvn $MVN_ARGS_SETTINGS clean

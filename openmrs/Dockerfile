@@ -16,11 +16,16 @@ RUN apk add --no-cache git && \
     git clone --depth 1 --branch "${CONTENT_REPO_REF}" "${CONTENT_REPO_URL}" /content
 
 ### UgandaEMR content package stage
+# Fetch a pinned commit explicitly. "git clone --branch" only accepts a branch or tag,
+# not a raw commit SHA (which caused the previous "Remote branch ... not found" failure).
 FROM alpine:3.19 AS uganda-content-clone
 ARG UGANDA_CONTENT_REPO_URL="https://github.com/METS-Programme/openmrs-content-ugandaemrcorepack.git"
-ARG UGANDA_CONTENT_REPO_REF="58f29646675db3db2db2db1bc50f7cf3a6c1d36c"
+ARG UGANDA_CONTENT_REPO_REF="58f29646675dbeb3db2dbd1bc50f7cf3a6c1d36c"
 RUN apk add --no-cache git && \
-    git clone --depth 1 --branch "${UGANDA_CONTENT_REPO_REF}" "${UGANDA_CONTENT_REPO_URL}" /uganda-content
+    git init /uganda-content && \
+    git -C /uganda-content remote add origin "${UGANDA_CONTENT_REPO_URL}" && \
+    git -C /uganda-content fetch --depth 1 origin "${UGANDA_CONTENT_REPO_REF}" && \
+    git -C /uganda-content checkout --detach FETCH_HEAD
 
 ### Dev stage (build)
 FROM openmrs/openmrs-core:2.8.x-dev-amazoncorretto-21 AS dev

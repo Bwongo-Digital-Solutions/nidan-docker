@@ -19,7 +19,7 @@ RUN apk add --no-cache git && \
 FROM alpine:3.19 AS uganda-content-clone
 ARG UGANDA_CONTENT_REPO_URL="https://github.com/METS-Programme/openmrs-content-ugandaemrcorepack.git"
 ARG UGANDA_CONTENT_REPO_REF="58f29646675db3db2db2db1bc50f7cf3a6c1d36c"
-RUN apk add --no-cache git && \\
+RUN apk add --no-cache git && \
     git clone --depth 1 --branch "${UGANDA_CONTENT_REPO_REF}" "${UGANDA_CONTENT_REPO_URL}" /uganda-content
 
 ### Dev stage (build)
@@ -63,8 +63,10 @@ RUN \
     cp -R /tmp/openmrs-content-referenceapplication-demo/configuration/* /openmrs/distribution/openmrs_config/ && \
     mkdir -p /openmrs/distribution/openmrs_config/backend_configuration /openmrs/distribution/openmrs_config/shared_configuration && \
     rm -rf /openmrs/distribution/openmrs_config/backend_configuration/addresshierarchy && \
-    cp -R /uganda-content/configuration/backend_configuration/. /openmrs/distribution/openmrs_config/backend_configuration/ && \
-    cp -R /uganda-content/configuration/shared_configuration/. /openmrs/distribution/openmrs_config/shared_configuration/ && \
+    cp -R /tmp/uganda-content/backend_configuration/. /openmrs/distribution/openmrs_config/backend_configuration/ && \
+    cp -R /tmp/uganda-content/shared_configuration/. /openmrs/distribution/openmrs_config/shared_configuration/ && \
+    mkdir -p /openmrs/distribution/openmrs_config/backend_configuration/globalproperties && \
+    cp -R /tmp/nidan-globalproperties/. /openmrs/distribution/openmrs_config/backend_configuration/globalproperties/ && \
     rm -rf /tmp/openmrs-content-referenceapplication-demo && \
     \
     mvn $MVN_ARGS_SETTINGS clean

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <globalProperties>
+    <globalProperty>
+      <property>default_locale</property>
+      <value>en_GB</value>
+      <description>Default English (United Kingdom) locale for day-first date conventions.</description>
+    </globalProperty>
+    <globalProperty>
+      <property>htmlformentry.dateFormat</property>
+      <value>dd/MM/yyyy</value>
+      <description>Use day/month/year in HTML Form Entry.</description>
+    </globalProperty>
+    <globalProperty>
+      <property>htmlformentry.showDateFormat</property>
+      <value>true</value>
+      <description>Show the expected date format beside HTML Form Entry date fields.</description>
+    </globalProperty>
+    <globalProperty>
+      <property>uiframework.formatter.JSdateFormat</property>
+      <value>DD/MM/YYYY</value>
+      <description>Day-first date format for legacy UI framework date formatting.</description>
+    </globalProperty>
+  </globalProperties>
+</config>

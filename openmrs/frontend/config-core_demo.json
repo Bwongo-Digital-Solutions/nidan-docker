@@ -80,9 +80,7 @@
         ]
       },
       "action-menu-patient-chart-items-slot": {
-        "order": [
-          "order-basket-action-menu"
-        ]
+        "order": ["order-basket-action-menu"]
       },
       "patient-chart-summary-dashboard-slot": {
         "add": [
@@ -113,9 +111,7 @@
     "ipdVisitTypeUuid": "7b0f5697-27e3-40c4-8bae-f4049abfb4ed",
     "extensionSlots": {
       "action-menu-ward-patient-items-slot": {
-        "add": [
-          "order-basket-action-menu"
-        ]
+        "add": ["order-basket-action-menu"]
       }
     },
     "dischargeNoteFormUuid": "a9d36a3b-71d5-3dfc-9ebb-61db4bbbab2d",
@@ -158,15 +154,8 @@
     "Brand color #1": "#006D8F",
     "Brand color #2": "#003B5C",
     "implementationName": "ClinicEMR-EHR",
-    "preferredCalendar": {
-      "en": "gregory",
-      "en-GB": "gregory"
-    },
-    "preferredDateLocale": {
-      "en": "en-GB",
-      "en-GB": "en-GB"
-    }
-  },
+    "preferredCalendar": {"en": "gregory", "en-GB": "gregory"},
+    "preferredDateLocale": {"en": "en-GB", "en-GB": "en-GB"}},
   "@kenyaemr/esm-imaging-orders-app": {
     "radiologyConceptSetUuid": "cd9f116c-517d-439e-847d-d8d257434083",
     "orders": {
@@ -186,28 +175,17 @@
     }
   },
   "@openmrs/esm-patient-registration-app": {
-    "sections": [
-      "demographics",
-      "contact",
-      "relationships",
-      "additional-info"
-    ],
+    "sections": ["demographics", "contact", "relationships", "additional-info"],
+
     "sectionDefinitions": [
       {
         "id": "contact",
-        "fields": [
-          "address",
-          "phone",
-          "emergencyContact"
-        ]
+        "fields": ["address", "phone","emergencyContact"]
       },
       {
         "id": "additional-info",
         "name": "Additional Information",
-        "fields": [
-          "ethnicity",
-          "bloodGroup"
-        ]
+        "fields": ["ethnicity", "bloodGroup"]
       }
     ],
     "fieldConfigurations": {
@@ -288,46 +266,14 @@
     "showIntakeOutput": true,
     "showNonMedicationTasks": false,
     "ipdDashboardSections": [
-      {
-        "componentKey": "AL",
-        "title": "Allergies",
-        "displayOrder": 1
-      },
-      {
-        "componentKey": "VT",
-        "title": "Vitals",
-        "displayOrder": 2
-      },
-      {
-        "componentKey": "DG",
-        "title": "Diagnosis",
-        "displayOrder": 3
-      },
-      {
-        "componentKey": "TR",
-        "title": "Treatments",
-        "displayOrder": 4
-      },
-      {
-        "componentKey": "NT",
-        "title": "Nursing Tasks",
-        "displayOrder": 5
-      },
-      {
-        "componentKey": "DC",
-        "title": "Drug Chart",
-        "displayOrder": 6
-      },
-      {
-        "componentKey": "IO",
-        "title": "Intake Output",
-        "displayOrder": 7
-      },
-      {
-        "componentKey": "NMT",
-        "title": "Non-Medication Tasks",
-        "displayOrder": 8
-      }
+      { "componentKey": "AL", "title": "Allergies", "displayOrder": 1 },
+      { "componentKey": "VT", "title": "Vitals", "displayOrder": 2 },
+      { "componentKey": "DG", "title": "Diagnosis", "displayOrder": 3 },
+      { "componentKey": "TR", "title": "Treatments", "displayOrder": 4 },
+      { "componentKey": "NT", "title": "Nursing Tasks", "displayOrder": 5 },
+      { "componentKey": "DC", "title": "Drug Chart", "displayOrder": 6 },
+      { "componentKey": "IO", "title": "Intake Output", "displayOrder": 7 },
+      { "componentKey": "NMT", "title": "Non-Medication Tasks", "displayOrder": 8 }
     ],
     "patientSearchMinChars": 3,
     "nursingTaskLateWindowMinutes": 60,
@@ -336,18 +282,9 @@
     },
     "intakeOutputFormUuid": "de010f04-2eb5-3a9c-afec-587868f3c2fa",
     "shiftDetails": {
-      "1": {
-        "shiftStartTime": "06:00",
-        "shiftEndTime": "13:00"
-      },
-      "2": {
-        "shiftStartTime": "13:00",
-        "shiftEndTime": "17:00"
-      },
-      "3": {
-        "shiftStartTime": "17:00",
-        "shiftEndTime": "06:00"
-      }
+      "1": { "shiftStartTime": "06:00", "shiftEndTime": "13:00" },
+      "2": { "shiftStartTime": "13:00", "shiftEndTime": "17:00" },
+      "3": { "shiftStartTime": "17:00", "shiftEndTime": "06:00" }
     }
   },
   "@openmrs/esm-home-app": {
@@ -496,9 +433,9 @@
     "country": "Uganda",
     "logo": {
       "src": "/openmrs/spa/billing-logo.jpg",
-      "alt": "UG"
+      "alt": "UG" 
     }
-  },
+  },  
   "@openmrs/esm-login-app": {
     "logo": {
       "src": "${openmrsSpaBase}/clinicemr-logo.svg",

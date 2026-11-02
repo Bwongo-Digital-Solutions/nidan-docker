@@ -37,12 +37,18 @@ class UgandaAddressImportWizard(models.TransientModel):
         levels = ("country", "district", "county", "subcounty", "parish", "village")
         nodes_by_level = {level: {} for level in levels}
         seen_paths = set()
-        skipped = ignored = 0
+        skipped = ignored = repaired = 0
         errors = []
 
         for line_number, row in enumerate(csv.reader(io.StringIO(text, newline="")), 1):
             if not row or not any((cell or "").strip() for cell in row):
                 continue
+            # Two source rows encode parish and village together in the final
+            # quoted cell. Split only the first comma; commas later in the
+            # village label (for example, ranch numbers) remain untouched.
+            if len(row) == 5 and "," in row[4]:
+                row = row[:4] + [part.strip() for part in row[4].split(",", 1)]
+                repaired += 1
             if len(row) != 6:
                 skipped += 1
                 errors.append(_("Line %(line)s: expected 6 columns, found %(count)s")
@@ -108,11 +114,13 @@ class UgandaAddressImportWizard(models.TransientModel):
 
         message = _(
             "Import completed. Created %(created)s areas; reused %(reused)s existing areas; "
-            "ignored %(ignored)s non-Uganda rows; skipped %(skipped)s duplicate or invalid rows."
+            "ignored %(ignored)s non-Uganda rows; repaired %(repaired)s five-column rows; "
+            "skipped %(skipped)s duplicate or invalid rows."
         ) % {
             "created": created,
             "reused": reused,
             "ignored": ignored,
+            "repaired": repaired,
             "skipped": skipped,
         }
         if errors:

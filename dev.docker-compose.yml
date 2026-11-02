@@ -168,6 +168,8 @@ services:
       - odoo-data:/var/lib/odoo
       # Mount custom addons (including nidan_connector) for dev
       - ${ODOO_ADDONS_PATH:-../odoo_19_addons}:/mnt/extra-addons
+      # Uganda address hierarchy addon maintained in this repository.
+      - ./odoo/addons/uganda_address_hierarchy:/mnt/extra-addons/uganda_address_hierarchy:ro
       # Mount the private/closed-source addons for live editing in dev
       - ${ODOO_PRIVATE_ADDONS_HOST_PATH:-../nidan_odoo_extra_addons}:/mnt/private-addons
       # Payment gateway addons (NEPALPAY QR, Fonepay, Khalti, eSewa). Deliberately kept out

@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_uganda_address_area_user,uganda.address.area user,model_uganda_address_area,base.group_user,1,0,0,0
+access_uganda_address_area_admin,uganda.address.area admin,model_uganda_address_area,base.group_system,1,1,1,1
+access_uganda_address_import_wizard_admin,uganda.address.import.wizard admin,model_uganda_address_import_wizard,base.group_system,1,1,1,1

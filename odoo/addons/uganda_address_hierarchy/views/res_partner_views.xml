@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_uganda_address_hierarchy" model="ir.ui.view">
+        <field name="name">res.partner.form.uganda.address.hierarchy</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='country_id']" position="after">
+                <field name="uganda_district_id" options="{'no_create': True}"/>
+                <field name="uganda_county_id" options="{'no_create': True}"
+                       domain="[('level', '=', 'county'), ('parent_id', '=', uganda_district_id)]"/>
+                <field name="uganda_subcounty_id" options="{'no_create': True}"
+                       domain="[('level', '=', 'subcounty'), ('parent_id', '=', uganda_county_id)]"/>
+                <field name="uganda_parish_id" options="{'no_create': True}"
+                       domain="[('level', '=', 'parish'), ('parent_id', '=', uganda_subcounty_id)]"/>
+                <field name="uganda_village_id" options="{'no_create': True}"
+                       domain="[('level', '=', 'village'), ('parent_id', '=', uganda_parish_id)]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

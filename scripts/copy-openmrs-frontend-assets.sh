@@ -18,7 +18,7 @@ OPENMRS_HTML_DIR="/usr/share/nginx/html"
 GATEWAY_HTML_DIR="/usr/share/nginx/html"
 GATEWAY_TEMPLATE_DIR="/etc/nginx/templates"
 SPA_DIR=""
-COPY_PROXY_ASSETS=false
+COPY_PROXY_ASSETS=true
 
 usage() {
   cat <<'USAGE'
@@ -26,8 +26,7 @@ Copy static files into running NIDAN nginx containers without rebuilding them.
 
 Options:
   --spa-dir DIR    Also copy an existing, already-built OpenMRS SPA directory.
-  --proxy-assets   Copy gateway portal assets, logos, 502 page, and portal
-                   template into the running gateway, then regenerate index.html.
+  --no-proxy-assets  Skip copying proxy portal assets (copied by default).
   -h, --help       Show this help.
 
 Environment:
@@ -45,8 +44,8 @@ while (($#)); do
       SPA_DIR="$2"
       shift 2
       ;;
-    --proxy-assets)
-      COPY_PROXY_ASSETS=true
+    --no-proxy-assets)
+      COPY_PROXY_ASSETS=false
       shift
       ;;
     -h|--help)
@@ -124,13 +123,12 @@ echo "OpenMRS runtime config and branding copied."
 if [[ "$COPY_PROXY_ASSETS" == true ]]; then
   [[ -d "${PROXY_DIR}/assets" ]] || { echo "ERROR: Missing ${PROXY_DIR}/assets" >&2; exit 1; }
   PROXY_FILES=(
-    "${PROXY_DIR}/index.html.template"
-    "${PROXY_DIR}/502.html"
-    "${PROXY_DIR}/nidan-logo.png"
-    "${PROXY_DIR}/trigonal-logo.png"
+    "${PROXY_DIR}/clinicemr-logo.svg"
+    "${PROXY_DIR}/clinicemr-logo-white.svg"
+    "${PROXY_DIR}/favicon.ico"
   )
   for file in "${PROXY_FILES[@]}"; do
-    [[ -s "$file" ]] || { echo "ERROR: Missing gateway asset: $file" >&2; exit 1; }
+    [[ -s "$file" ]] || { echo "ERROR: Missing proxy asset: $file" >&2; exit 1; }
   done
 
   GATEWAY="${GATEWAY_CONTAINER:-}"
@@ -150,22 +148,29 @@ if [[ "$COPY_PROXY_ASSETS" == true ]]; then
     exit 1
   }
 
-  echo "Copying gateway static assets to: $GATEWAY"
-  docker exec "$GATEWAY" mkdir -p "$GATEWAY_HTML_DIR/assets" "$GATEWAY_TEMPLATE_DIR"
+  echo "Copying proxy static assets to gateway: $GATEWAY"
+  docker exec "$GATEWAY" mkdir -p "$GATEWAY_HTML_DIR/assets"
   tar -C "${PROXY_DIR}/assets" -cf - . | docker exec -i "$GATEWAY" tar -C "$GATEWAY_HTML_DIR/assets" -xf -
 
+  # These ClinicEMR files are not bind-mounted in Compose, so copy them into
+  # the running gateway. The nginx.conf, index template, 502 page and legacy
+  # logos are already bind-mounted from ./proxy and reflect host-side changes.
   for file in "${PROXY_FILES[@]}"; do
     docker cp "$file" "$GATEWAY:/tmp/$(basename "$file")"
   done
   docker exec "$GATEWAY" sh -eu -c '
-    install -m 0644 /tmp/502.html /usr/share/nginx/html/502.html
-    install -m 0644 /tmp/nidan-logo.png /usr/share/nginx/html/nidan-logo.png
-    install -m 0644 /tmp/trigonal-logo.png /usr/share/nginx/html/trigonal-logo.png
-    install -m 0644 /tmp/index.html.template /etc/nginx/templates/index.html.template
-    envsubst '\''${DASHBOARD_ODOO_URL}'\'' < /etc/nginx/templates/index.html.template > /usr/share/nginx/html/index.html
-    rm -f /tmp/502.html /tmp/nidan-logo.png /tmp/trigonal-logo.png /tmp/index.html.template
+    install -m 0644 /tmp/clinicemr-logo.svg /usr/share/nginx/html/clinicemr-logo.svg
+    install -m 0644 /tmp/clinicemr-logo-white.svg /usr/share/nginx/html/clinicemr-logo-white.svg
+    install -m 0644 /tmp/favicon.ico /usr/share/nginx/html/favicon.ico
+    rm -f /tmp/clinicemr-logo.svg /tmp/clinicemr-logo-white.svg /tmp/favicon.ico
+
+    # Re-render the portal from the bind-mounted template so changed HTML is
+    # visible immediately, without restarting nginx or recreating the gateway.
+    if [ -f /etc/nginx/templates/index.html.template ]; then
+      envsubst '\''${DASHBOARD_ODOO_URL}'\'' < /etc/nginx/templates/index.html.template > /usr/share/nginx/html/index.html
+    fi
   '
-  echo "Gateway assets and portal page copied to $GATEWAY."
+  echo "Proxy assets copied and portal index regenerated."
 fi
 
 echo

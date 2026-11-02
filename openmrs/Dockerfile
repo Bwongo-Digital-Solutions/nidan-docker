@@ -70,6 +70,11 @@ RUN \
     rm -rf /openmrs/distribution/openmrs_config/backend_configuration/addresshierarchy && \
     cp -R /tmp/uganda-content/backend_configuration/. /openmrs/distribution/openmrs_config/backend_configuration/ && \
     cp -R /tmp/uganda-content/shared_configuration/. /openmrs/distribution/openmrs_config/shared_configuration/ && \
+    # Address Hierarchy module reads its configuration from the root configuration directory,
+    # not from Initializer's backend_configuration/shared_configuration scope directories. \
+    rm -rf /openmrs/distribution/openmrs_config/addresshierarchy && \
+    mkdir -p /openmrs/distribution/openmrs_config/addresshierarchy && \
+    cp -R /tmp/uganda-content/backend_configuration/addresshierarchy/. /openmrs/distribution/openmrs_config/addresshierarchy/ && \
     mkdir -p /openmrs/distribution/openmrs_config/backend_configuration/globalproperties && \
     cp -R /tmp/nidan-globalproperties/. /openmrs/distribution/openmrs_config/backend_configuration/globalproperties/ && \
     rm -rf /tmp/openmrs-content-referenceapplication-demo && \

@@ -2,6 +2,7 @@ import base64
 import csv
 import io
 import logging
+from collections import defaultdict
 
 from odoo import fields, models, _
 from odoo.exceptions import UserError
@@ -31,13 +32,15 @@ class UgandaAddressImportWizard(models.TransientModel):
         except (ValueError, UnicodeDecodeError) as exc:
             raise UserError(_("The CSV must be a valid UTF-8 file.")) from exc
 
-        reader = csv.reader(io.StringIO(text, newline=""))
-        Area = self.env["uganda.address.area"].sudo()
-        created = reused = skipped = 0
-        seen = set()
+        # Parse and de-duplicate paths first, then import one hierarchy level at
+        # a time. This avoids hundreds of thousands of individual ORM searches.
+        levels = ("country", "district", "county", "subcounty", "parish", "village")
+        nodes_by_level = {level: {} for level in levels}
+        seen_paths = set()
+        skipped = ignored = 0
         errors = []
 
-        for line_number, row in enumerate(reader, start=1):
+        for line_number, row in enumerate(csv.reader(io.StringIO(text, newline="")), 1):
             if not row or not any((cell or "").strip() for cell in row):
                 continue
             if len(row) != 6:
@@ -46,71 +49,81 @@ class UgandaAddressImportWizard(models.TransientModel):
                               % {"line": line_number, "count": len(row)})
                 continue
 
-            country, district, county, subcounty, parish, village = [
-                (cell or "").strip() for cell in row
-            ]
-            if country.casefold() != "uganda":
-                skipped += 1
+            values = tuple((cell or "").strip() for cell in row)
+            if values[0].casefold() != "uganda":
+                ignored += 1
                 continue
-            values = (country, district, county, subcounty, parish, village)
             if not all(values):
                 skipped += 1
                 errors.append(_("Line %s: one or more hierarchy values are empty.") % line_number)
                 continue
 
-            key = tuple(value.casefold() for value in values)
-            if key in seen:
+            normalized = tuple(value.casefold() for value in values)
+            if normalized in seen_paths:
                 skipped += 1
                 continue
-            seen.add(key)
+            seen_paths.add(normalized)
 
-            try:
-                with self.env.cr.savepoint():
-                    parent = None
-                    for name, level in (
-                        (country, "country"),
-                        (district, "district"),
-                        (county, "county"),
-                        (subcounty, "subcounty"),
-                        (parish, "parish"),
-                        (village, "village"),
-                    ):
-                        existing = Area.with_context(active_test=False).search(
-                            [
-                                ("name", "=", name),
-                                ("level", "=", level),
-                                ("parent_id", "=", parent.id if parent else False),
-                            ],
-                            limit=1,
-                        )
-                        if existing:
-                            if self.update_existing and not existing.active:
-                                existing.active = True
-                            parent = existing
-                            reused += 1
-                        else:
-                            parent = Area.create({
-                                "name": name,
-                                "level": level,
-                                "parent_id": parent.id if parent else False,
-                            })
-                            created += 1
-            except Exception as exc:
-                skipped += 1
-                errors.append(_("Line %(line)s: %(error)s") % {
-                    "line": line_number, "error": str(exc)
-                })
-                _logger.exception("Failed importing Uganda address CSV line %s", line_number)
+            for index, level in enumerate(levels):
+                parent_key = normalized[:index] or None
+                node_key = (parent_key, normalized[index])
+                nodes_by_level[level].setdefault(node_key, values[index])
+
+        Area = self.env["uganda.address.area"].sudo().with_context(active_test=False)
+        path_to_id = {}
+        created = reused = 0
+
+        for index, level in enumerate(levels):
+            existing = Area.search([("level", "=", level)])
+            existing_by_parent_name = {
+                (record.parent_id.id or False, record.name.casefold()): record
+                for record in existing
+            }
+            pending = []
+
+            for (parent_key, normalized_name), name in nodes_by_level[level].items():
+                parent_id = path_to_id.get(parent_key) if parent_key else False
+                existing_record = existing_by_parent_name.get((parent_id or False, normalized_name))
+                full_path_key = (parent_key or ()) + (normalized_name,)
+
+                if existing_record:
+                    if self.update_existing and not existing_record.active:
+                        existing_record.active = True
+                    path_to_id[full_path_key] = existing_record.id
+                    reused += 1
+                else:
+                    pending.append((full_path_key, {
+                        "name": name,
+                        "level": level,
+                        "parent_id": parent_id,
+                    }))
+
+            # Keep ORM batches bounded for installations with many villages.
+            for offset in range(0, len(pending), 1000):
+                batch = pending[offset:offset + 1000]
+                records = Area.create([values for _key, values in batch])
+                for (path_key, _values), record in zip(batch, records):
+                    path_to_id[path_key] = record.id
+                created += len(records)
 
         message = _(
-            "Import completed. Created %(created)s administrative areas; "
-            "reused %(reused)s existing areas; skipped %(skipped)s CSV rows."
-        ) % {"created": created, "reused": reused, "skipped": skipped}
+            "Import completed. Created %(created)s areas; reused %(reused)s existing areas; "
+            "ignored %(ignored)s non-Uganda rows; skipped %(skipped)s duplicate or invalid rows."
+        ) % {
+            "created": created,
+            "reused": reused,
+            "ignored": ignored,
+            "skipped": skipped,
+        }
         if errors:
-            message += "\\n\\n" + _("First import warnings:") + "\\n" + "\\n".join(errors[:20])
+            message += "\\n\\n" + _("Import warnings:") + "\\n" + "\\n".join(errors[:20])
             if len(errors) > 20:
                 message += "\\n" + _("...and %(count)s more.") % {"count": len(errors) - 20}
 
+        _logger.info(
+            "Uganda address import finished: %s created, %s reused, %s ignored, %s skipped",
+            created, reused, ignored, skipped,
+        )
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",

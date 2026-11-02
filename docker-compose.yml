@@ -232,11 +232,10 @@ services:
       - ODOO_DB_FILTER=^${ODOO_DB_NAME:-nidan}$
     volumes:
       - odoo-data:/var/lib/odoo
-      # Addons come from the image (baked at /mnt/extra-addons + /mnt/private-addons).
-      # No host addon source should be mounted in prod.
-      # - ${ODOO_ADDONS_PATH:-../odoo_19_addons}:/mnt/extra-addons
-      # Mount the private/closed-source addons for live editing in dev
-      # - ${ODOO_PRIVATE_ADDONS_HOST_PATH:-../nidan_odoo_extra_addons}:/mnt/private-addons
+      # Third-party and private addons are baked into the Odoo image.
+      # Keep the Uganda hierarchy addon from this repository available in production.
+      # The deployment checkout must include ./odoo/addons/uganda_address_hierarchy.
+      - ./odoo/addons/uganda_address_hierarchy:/mnt/extra-addons/uganda_address_hierarchy:ro
       # odoo.conf from git (read-only). Entrypoint copies to container; runtime changes stay in container.
       - ./odoo/odoo.conf:/mnt/odoo.conf.template:ro
     networks:

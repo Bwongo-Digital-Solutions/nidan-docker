@@ -42,9 +42,14 @@ class UgandaAddressImportWizard(models.TransientModel):
         for line_number, row in enumerate(csv.reader(io.StringIO(text, newline="")), 1):
             if not row or not any((cell or "").strip() for cell in row):
                 continue
-            # Two source rows encode parish and village together in the final
-            # quoted cell. Split only the first comma; commas later in the
-            # village label (for example, ranch numbers) remain untouched.
+            # Ignore other countries before validating their row shape.
+            if (row[0] or "").strip().casefold() != "uganda":
+                ignored += 1
+                continue
+
+            # Two Uganda source rows encode parish and village together in the
+            # final quoted cell. Split only the first comma; later commas in
+            # village labels (such as ranch numbers) remain untouched.
             if len(row) == 5 and "," in row[4]:
                 row = row[:4] + [part.strip() for part in row[4].split(",", 1)]
                 repaired += 1
@@ -55,9 +60,6 @@ class UgandaAddressImportWizard(models.TransientModel):
                 continue
 
             values = tuple((cell or "").strip() for cell in row)
-            if values[0].casefold() != "uganda":
-                ignored += 1
-                continue
             if not all(values):
                 skipped += 1
                 errors.append(_("Line %s: one or more hierarchy values are empty.") % line_number)

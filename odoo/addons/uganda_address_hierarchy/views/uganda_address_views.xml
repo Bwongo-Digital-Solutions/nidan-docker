@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_uganda_address_area_list" model="ir.ui.view">
+        <field name="name">uganda.address.area.list</field>
+        <field name="model">uganda.address.area</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="complete_name"/>
+                <field name="level"/>
+                <field name="parent_id"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_uganda_address_area_form" model="ir.ui.view">
+        <field name="name">uganda.address.area.form</field>
+        <field name="model">uganda.address.area</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="level"/>
+                        <field name="parent_id"/>
+                        <field name="active"/>
+                    </group>
+                    <field name="child_ids">
+                        <list>
+                            <field name="name"/>
+                            <field name="level"/>
+                            <field name="active"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_uganda_address_areas" model="ir.actions.act_window">
+        <field name="name">Uganda Administrative Areas</field>
+        <field name="res_model">uganda.address.area</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="view_uganda_address_import_wizard_form" model="ir.ui.view">
+        <field name="name">uganda.address.import.wizard.form</field>
+        <field name="model">uganda.address.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import Uganda Addresses">
+                <group>
+                    <field name="file" filename="filename"/>
+                    <field name="filename" invisible="1"/>
+                    <field name="update_existing"/>
+                </group>
+                <footer>
+                    <button name="action_import" type="object" string="Import CSV" class="btn-primary"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_uganda_address_import" model="ir.actions.act_window">
+        <field name="name">Import Uganda Address CSV</field>
+        <field name="res_model">uganda.address.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    <menuitem id="menu_uganda_address_root" name="Uganda Addresses"
+              parent="contacts.menu_contacts" sequence="85" groups="base.group_system"/>
+    <menuitem id="menu_uganda_address_areas" name="Administrative Areas"
+              parent="menu_uganda_address_root" action="action_uganda_address_areas"
+              sequence="10" groups="base.group_system"/>
+    <menuitem id="menu_uganda_address_import" name="Import CSV"
+              parent="menu_uganda_address_root" action="action_uganda_address_import"
+              sequence="20" groups="base.group_system"/>
+</odoo>

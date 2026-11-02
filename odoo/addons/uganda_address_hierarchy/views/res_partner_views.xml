@@ -5,7 +5,7 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='city']" position="after">
+            <xpath expr="//field[@name='country_id']" position="after">
                 <field name="uganda_district_id" options="{'no_create': True}"/>
                 <field name="uganda_county_id" options="{'no_create': True}"
                        domain="[('level', '=', 'county'), ('parent_id', '=', uganda_district_id)]"/>

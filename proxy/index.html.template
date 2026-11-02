@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ClinicEMR Services Portal</title>
-  <link rel="icon" href="openmrs/frontend/resources/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="proxy/clinicemr-logo.svg" type="image/x-icon">
   <style>
     /* ==========================================================================
        1. Global Styles & CSS Variables
@@ -557,6 +557,7 @@
             <img src="/assets/images/dhis2-logo.svg" alt="DHIS2" class="tech-logo-small" />
             <img src="/assets/images/OrthancLogo.png" alt="Orthanc" class="tech-logo-small" />
             <img src="/assets/images/odoo_logo.svg" alt="Odoo" class="tech-logo-small" />
+           <img src="/trigonal-logo.png" alt="Trigonal Technology" class="footer-logo">
           </div>
         </div>
       </div>
@@ -565,9 +566,9 @@
       <div class="footer-right">
         <span>
           Powered by
-          <a href="https://trigonaltechnology.com/" target="_blank" class="footer-brand-link">
-            <img src="/trigonal-logo.png" alt="Trigonal Technology" class="footer-logo">
-            <strong>Trigonal Technology</strong>
+          <a href="https://bwongo.site" target="_blank" class="footer-brand-link">
+            <img src="proxy/clinicemr-logo.svg" alt="Bwongo Digital Solutions " class="footer-logo">
+            <strong>Bwongo Digital Solutions (U) Ltd</strong>
           </a>
         </span>
         <span class="copyright-text">© 2027 ClinicEMR. All rights reserved.</span>

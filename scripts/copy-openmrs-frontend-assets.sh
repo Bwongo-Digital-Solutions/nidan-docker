@@ -51,9 +51,9 @@ while (($#)); do
   esac
 done
 
-if [[ -z "$SPA_DIR" && -d "${FRONTEND_DIR}/spa" ]]; then
-  SPA_DIR="${FRONTEND_DIR}/spa"
-fi
+# Only copy a SPA bundle when the caller explicitly supplies --spa-dir.
+# The standard Docker build keeps the compiled SPA inside the image, so a
+# local openmrs/frontend/spa directory is not expected to exist.
 
 command -v docker >/dev/null 2>&1 || {
   echo "ERROR: docker is not installed or not in PATH" >&2
@@ -86,14 +86,14 @@ fi
 
 if [[ -n "$SPA_DIR" ]]; then
   [[ -d "$SPA_DIR" && -s "${SPA_DIR}/index.html" ]] || {
-    echo "ERROR: SPA directory must exist and contain index.html: $SPA_DIR" >&2
+    echo "ERROR: The supplied SPA directory must exist and contain index.html: $SPA_DIR" >&2
     exit 1
   }
   echo "Copying prebuilt SPA files from: $SPA_DIR"
   # Stream the existing build into nginx; no image build or container restart.
   tar -C "$SPA_DIR" -cf - . | docker exec -i "$CONTAINER" tar -C "$HTML_DIR" -xf -
 else
-  echo "No SPA build directory supplied/found; leaving existing JS/CSS bundles unchanged."
+  echo "No --spa-dir supplied; keeping the currently installed SPA JavaScript/CSS bundles."
 fi
 
 # Copy the source-controlled runtime config and branding files.

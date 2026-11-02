@@ -10,7 +10,14 @@ ARG APP_SHELL_VERSION=10.0.0
 RUN mkdir -p /app
 WORKDIR /app
 
-# Use the npm registry mirror and allow slower connections during dependency installation.
+# Configure both Yarn and npm fetch settings. The OpenMRS assembler resolves
+# frontend modules independently of the preceding yarn add commands.
+ENV npm_config_registry=https://registry.npmjs.org \
+    npm_config_fetch_retries=5 \
+    npm_config_fetch_retry_mintimeout=20000 \
+    npm_config_fetch_retry_maxtimeout=120000 \
+    npm_config_fetch_timeout=600000
+
 RUN yarn config set registry https://registry.npmjs.org \
     && yarn config set network-timeout 600000
 
@@ -75,7 +82,19 @@ RUN yarn add ./openmrs-esm-patient-orders-fast-app-12.0.1.tgz
 RUN yarn add ./openmrs-esm-patient-medications-app-12.1.0-trigonal.tgz
 RUN yarn add ./openmrs-esm-appointments-app-10.0.2.tgz
 
-RUN yarn openmrs assemble --manifest --mode config --config spa-assemble-config.json --target ./spa
+# Retry transient registry/network failures during SPA dependency resolution.
+RUN set -eu; \
+    attempt=1; \
+    until yarn openmrs assemble --manifest --mode config --config spa-assemble-config.json --target ./spa; do \
+      if [ "$attempt" -ge 4 ]; then \
+        echo "OpenMRS SPA assembly failed after $attempt attempts"; \
+        exit 1; \
+      fi; \
+      delay=$((attempt * 20)); \
+      echo "SPA assembly failed; retrying in ${delay}s (attempt $((attempt + 1))/4)..."; \
+      sleep "$delay"; \
+      attempt=$((attempt + 1)); \
+    done
 
 RUN yarn openmrs build --build-config spa-build-config.json --target ./spa
 

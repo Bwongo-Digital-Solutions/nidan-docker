@@ -185,7 +185,7 @@
       {
         "id": "additional-info",
         "name": "Additional Information",
-        "fields": ["ethnicity", "bloodGroup"]
+        "fields": ["bloodGroup"]
       }
     ],
     "fieldConfigurations": {

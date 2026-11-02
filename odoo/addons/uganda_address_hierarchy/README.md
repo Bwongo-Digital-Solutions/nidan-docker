@@ -12,7 +12,7 @@ Adds the Uganda administrative address hierarchy to Odoo Contacts:
 4. As an Odoo administrator, open **Contacts → Uganda Addresses → Import CSV**.
 5. Select the supplied addresshierarchy.csv and run the import.
 
-The import is safe to repeat: matching areas are reused, inactive matches can be reactivated, and non-Uganda rows are ignored. Invalid rows are reported rather than guessed. Existing contacts and address fields are not wiped or rewritten.
+The import is safe to repeat: matching areas are reused, inactive matches can be reactivated, non-Uganda rows are ignored, and duplicate paths are skipped. Two five-column source rows combine parish and village in the last quoted value; the importer splits only the first comma in those values and preserves later commas in the village label. Other invalid rows are reported rather than guessed. Existing contacts and address fields are not wiped or rewritten.
 
 The contact form adds cascading District, County, Subcounty, Parish and Village selectors. Changing a parent clears child selections that no longer belong to it.
 

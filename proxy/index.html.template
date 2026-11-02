@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NidanEHR Services Portal</title>
-  <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+  <title>ClinicEMR Services Portal</title>
+  <link rel="icon" href="openmrs/frontend/resources/favicon.ico" type="image/x-icon">
   <style>
     /* ==========================================================================
        1. Global Styles & CSS Variables
@@ -458,12 +458,12 @@
 
       <!-- Brand Header -->
       <header class="header">
-        <img src="/assets/images/nidan-logo.svg" alt="NidanEHR" class="brand-logo">
+        <img src="openmrs/frontend/resources/clinicemr-logo.svg" alt="ClinicEMR" class="brand-logo">
       </header>
 
       <!-- Hero Section -->
       <div class="hero-container">
-        <h1 class="hero-title">Welcome to NidanEHR Services Portal</h1>
+        <h1 class="hero-title">Welcome to ClinicEMR Services Portal</h1>
       </div>
 
       <!-- Grid of Services -->
@@ -570,7 +570,7 @@
             <strong>Trigonal Technology</strong>
           </a>
         </span>
-        <span class="copyright-text">© 2026 NidanEHR. All rights reserved.</span>
+        <span class="copyright-text">© 2027 ClinicEMR. All rights reserved.</span>
       </div>
 
     </div>

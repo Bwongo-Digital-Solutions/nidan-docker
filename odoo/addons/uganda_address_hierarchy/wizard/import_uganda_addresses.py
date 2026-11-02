@@ -2,7 +2,6 @@ import base64
 import csv
 import io
 import logging
-from collections import defaultdict
 
 from odoo import fields, models, _
 from odoo.exceptions import UserError
@@ -124,9 +123,9 @@ class UgandaAddressImportWizard(models.TransientModel):
             "skipped": skipped,
         }
         if errors:
-            message += "\\n\\n" + _("Import warnings:") + "\\n" + "\\n".join(errors[:20])
+            message += "\n\n" + _("Import warnings:") + "\n" + "\n".join(errors[:20])
             if len(errors) > 20:
-                message += "\\n" + _("...and %(count)s more.") % {"count": len(errors) - 20}
+                message += "\n" + _("...and %(count)s more.") % {"count": len(errors) - 20}
 
         _logger.info(
             "Uganda address import finished: %s created, %s reused, %s ignored, %s skipped",

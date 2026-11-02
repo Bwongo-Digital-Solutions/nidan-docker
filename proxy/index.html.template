@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ClinicEMR Services Portal</title>
-  <link rel="icon" href="proxy/clinicemr-logo.svg" type="image/x-icon">
+  <link rel="icon" href="/clinicemr-logo.svg" type="image/svg+xml">
   <style>
     /* ==========================================================================
        1. Global Styles & CSS Variables
@@ -458,7 +458,7 @@
 
       <!-- Brand Header -->
       <header class="header">
-        <img src="openmrs/frontend/resources/clinicemr-logo.svg" alt="ClinicEMR" class="brand-logo">
+        <img src="/clinicemr-logo.svg" alt="ClinicEMR" class="brand-logo">
       </header>
 
       <!-- Hero Section -->

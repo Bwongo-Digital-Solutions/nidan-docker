@@ -120,10 +120,13 @@ services:
     restart: unless-stopped
 
   openmrs-frontend:
-    # build:
-    #   context: ./openmrs/frontend
-    #   dockerfile: Dockerfile
-    # The standard SPA build uses the Gregorian calendar and en-GB locale.
+    # Build the ClinicEMR SPA from this checkout so the locally maintained
+    # config-core_demo.json and custom frontend modules are included in the image.
+    build:
+      context: ./openmrs/frontend
+      dockerfile: Dockerfile
+    # Keep the established image name for deployments that also publish this build.
+    image: trigonaltechnology/openmrs-frontend:latest
     profiles: ["openmrs","nidanehr-standard"]
     image: trigonaltechnology/openmrs-frontend:latest
     container_name: nidan-openmrs-frontend

@@ -12,5 +12,5 @@
         "views/res_partner_views.xml",
     ],
     "installable": True,
-    "application": False,
+    "application": True,
 }

@@ -151,23 +151,38 @@ if [[ "$COPY_PROXY_ASSETS" == true ]]; then
   docker exec "$GATEWAY" mkdir -p "$GATEWAY_HTML_DIR/assets"
   tar -C "${PROXY_DIR}/assets" -cf - . | docker exec -i "$GATEWAY" tar -C "$GATEWAY_HTML_DIR/assets" -xf -
 
-  # These ClinicEMR files are not bind-mounted in Compose, so copy them into
-  # the running gateway. The nginx.conf, index template, 502 page and legacy
-  # logos are already bind-mounted from ./proxy and reflect host-side changes.
+  # The gateway's index template is COPY'd into the image by proxy/Dockerfile,
+  # not bind-mounted by Compose. Copy the current host version explicitly before
+  # rendering it; otherwise the container keeps serving the older baked-in page.
   for file in "${PROXY_FILES[@]}"; do
     docker cp "$file" "$GATEWAY:/tmp/$(basename "$file")"
   done
+  docker cp "${PROXY_DIR}/index.html.template" "$GATEWAY:/tmp/index.html.template"
+
+  # Keep root-level image assets referenced by the portal in sync as well.
+  for file in "${PROXY_DIR}/nidan-logo.png" "${PROXY_DIR}/trigonal-logo.png"; do
+    if [[ -s "$file" ]]; then
+      docker cp "$file" "$GATEWAY:/tmp/$(basename "$file")"
+    fi
+  done
+
   docker exec "$GATEWAY" sh -eu -c '
     install -m 0644 /tmp/clinicemr-logo.svg /usr/share/nginx/html/clinicemr-logo.svg
     install -m 0644 /tmp/clinicemr-logo-white.svg /usr/share/nginx/html/clinicemr-logo-white.svg
     install -m 0644 /tmp/favicon.ico /usr/share/nginx/html/favicon.ico
-    rm -f /tmp/clinicemr-logo.svg /tmp/clinicemr-logo-white.svg /tmp/favicon.ico
-
-    # Re-render the portal from the bind-mounted template so changed HTML is
-    # visible immediately, without restarting nginx or recreating the gateway.
-    if [ -f /etc/nginx/templates/index.html.template ]; then
-      envsubst '\''${DASHBOARD_ODOO_URL}'\'' < /etc/nginx/templates/index.html.template > /usr/share/nginx/html/index.html
+    if [ -f /tmp/nidan-logo.png ]; then
+      install -m 0644 /tmp/nidan-logo.png /usr/share/nginx/html/nidan-logo.png
     fi
+    if [ -f /tmp/trigonal-logo.png ]; then
+      install -m 0644 /tmp/trigonal-logo.png /usr/share/nginx/html/trigonal-logo.png
+    fi
+
+    # Render the freshly copied host template using the gateway's current
+    # environment. Only substitute the Odoo URL so JavaScript/CSS dollar signs
+    # and other template content remain untouched.
+    envsubst '\''${DASHBOARD_ODOO_URL}'\'' < /tmp/index.html.template > /usr/share/nginx/html/index.html
+    rm -f /tmp/clinicemr-logo.svg /tmp/clinicemr-logo-white.svg /tmp/favicon.ico
+    rm -f /tmp/nidan-logo.png /tmp/trigonal-logo.png /tmp/index.html.template
   '
   echo "Proxy assets copied and portal index regenerated."
 fi

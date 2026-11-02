@@ -18,7 +18,7 @@
       --text-muted: #64748b;
       --primary-teal: #008080;
 
-      --footer-bg: #008080;
+      --footer-bg: #002880;
       --footer-text: #ffffff;
       --footer-muted: rgba(255, 255, 255, 0.85);
 
@@ -567,7 +567,7 @@
         <span>
           Powered by
           <a href="https://bwongo.site" target="_blank" class="footer-brand-link">
-            <img src="proxy/clinicemr-logo.svg" alt="Bwongo Digital Solutions " class="footer-logo">
+            <img src="proxy/clinicemr-logo-white.svg" alt="Bwongo Digital Solutions " class="footer-logo">
             <strong>Bwongo Digital Solutions (U) Ltd</strong>
           </a>
         </span>

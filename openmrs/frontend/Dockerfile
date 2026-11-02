@@ -10,6 +10,10 @@ ARG APP_SHELL_VERSION=10.0.0
 RUN mkdir -p /app
 WORKDIR /app
 
+# Use the npm registry mirror and allow slower connections during dependency installation.
+RUN yarn config set registry https://registry.npmjs.org \
+    && yarn config set network-timeout 600000
+
 COPY spa-assemble-config.json spa-build-config.json .
 
 RUN yarn global add husky

@@ -202,7 +202,8 @@ services:
   odoo:
     # Open-source base by default; hospitals set ODOO_IMAGE to the private image
     # (e.g. trigonaltechnology/nidan_odoo_pro:stable) which bakes the closed-source
-    # addons into /mnt/private-addons. No host addon source is mounted in prod.
+    # addons into /mnt/private-addons. The first-party Uganda hierarchy addon is
+    # mounted read-only below from this deployment checkout.
     # image: ${ODOO_IMAGE:-trigonaltechnology/nidan_odoo:stable}
     profiles: ["odoo","nidanehr-standard"]
     image: trigonaltechnology/nidan_odoo:latest

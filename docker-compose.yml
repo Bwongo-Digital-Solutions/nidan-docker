@@ -128,7 +128,6 @@ services:
     # Keep the established image name for deployments that also publish this build.
     image: trigonaltechnology/openmrs-frontend:latest
     profiles: ["openmrs","nidanehr-standard"]
-    image: trigonaltechnology/openmrs-frontend:latest
     container_name: nidan-openmrs-frontend
     environment:
       - SPA_PATH=/openmrs/spa

@@ -5,8 +5,7 @@
 #
 # Usage:
 #   bash scripts/copy-openmrs-frontend-assets.sh
-#   bash scripts/copy-openmrs-frontend-assets.sh --proxy-assets
-#   bash scripts/copy-openmrs-frontend-assets.sh --spa-dir /path/to/built/spa --proxy-assets
+# #   bash scripts/copy-openmrs-frontend-assets.sh --spa-dir /path/to/built/spa
 #
 set -Eeuo pipefail
 

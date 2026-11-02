@@ -202,7 +202,7 @@ services:
   odoo:
     # Open-source base by default; hospitals set ODOO_IMAGE to the private image
     # (e.g. trigonaltechnology/nidan_odoo_pro:stable) which bakes the closed-source
-    # addons into /mnt/private-addons. No host addon source is mounted in prod.
+    # addons into /mnt/private-addons. Uganda address hierarchy is mounted from this checkout.
     # image: ${ODOO_IMAGE:-trigonaltechnology/nidan_odoo:stable}
     profiles: ["odoo","nidanehr-standard"]
     image: trigonaltechnology/nidan_odoo:latest
@@ -233,7 +233,8 @@ services:
     volumes:
       - odoo-data:/var/lib/odoo
       # Addons come from the image (baked at /mnt/extra-addons + /mnt/private-addons).
-      # No host addon source should be mounted in prod.
+      # Uganda address hierarchy addon is maintained in this repository and mounted read-only.
+      - ./odoo/addons/uganda_address_hierarchy:/mnt/extra-addons/uganda_address_hierarchy:ro
       # - ${ODOO_ADDONS_PATH:-../odoo_19_addons}:/mnt/extra-addons
       # Mount the private/closed-source addons for live editing in dev
       # - ${ODOO_PRIVATE_ADDONS_HOST_PATH:-../nidan_odoo_extra_addons}:/mnt/private-addons

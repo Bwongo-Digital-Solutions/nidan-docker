@@ -27,8 +27,7 @@ class UgandaAddressImportWizard(models.TransientModel):
             raise UserError(_("Please select the Uganda address CSV file."))
 
         try:
-            raw = base64.b64decode(self.file)
-            text = raw.decode("utf-8-sig")
+            text = base64.b64decode(self.file).decode("utf-8-sig")
         except (ValueError, UnicodeDecodeError) as exc:
             raise UserError(_("The CSV must be a valid UTF-8 file.")) from exc
 
@@ -53,49 +52,49 @@ class UgandaAddressImportWizard(models.TransientModel):
             if country.casefold() != "uganda":
                 skipped += 1
                 continue
-            if not all((country, district, county, subcounty, parish, village)):
+            values = (country, district, county, subcounty, parish, village)
+            if not all(values):
                 skipped += 1
                 errors.append(_("Line %s: one or more hierarchy values are empty.") % line_number)
                 continue
 
-            key = tuple(value.casefold() for value in (
-                country, district, county, subcounty, parish, village
-            ))
+            key = tuple(value.casefold() for value in values)
             if key in seen:
                 skipped += 1
                 continue
             seen.add(key)
 
-            parent = None
             try:
-                for name, level in (
-                    (country, "country"),
-                    (district, "district"),
-                    (county, "county"),
-                    (subcounty, "subcounty"),
-                    (parish, "parish"),
-                    (village, "village"),
-                ):
-                    existing = Area.with_context(active_test=False).search(
-                        [
-                            ("name", "=", name),
-                            ("level", "=", level),
-                            ("parent_id", "=", parent.id if parent else False),
-                        ],
-                        limit=1,
-                    )
-                    if existing:
-                        if self.update_existing and not existing.active:
-                            existing.active = True
-                        parent = existing
-                        reused += 1
-                    else:
-                        parent = Area.create({
-                            "name": name,
-                            "level": level,
-                            "parent_id": parent.id if parent else False,
-                        })
-                        created += 1
+                with self.env.cr.savepoint():
+                    parent = None
+                    for name, level in (
+                        (country, "country"),
+                        (district, "district"),
+                        (county, "county"),
+                        (subcounty, "subcounty"),
+                        (parish, "parish"),
+                        (village, "village"),
+                    ):
+                        existing = Area.with_context(active_test=False).search(
+                            [
+                                ("name", "=", name),
+                                ("level", "=", level),
+                                ("parent_id", "=", parent.id if parent else False),
+                            ],
+                            limit=1,
+                        )
+                        if existing:
+                            if self.update_existing and not existing.active:
+                                existing.active = True
+                            parent = existing
+                            reused += 1
+                        else:
+                            parent = Area.create({
+                                "name": name,
+                                "level": level,
+                                "parent_id": parent.id if parent else False,
+                            })
+                            created += 1
             except Exception as exc:
                 skipped += 1
                 errors.append(_("Line %(line)s: %(error)s") % {
@@ -108,9 +107,9 @@ class UgandaAddressImportWizard(models.TransientModel):
             "reused %(reused)s existing areas; skipped %(skipped)s CSV rows."
         ) % {"created": created, "reused": reused, "skipped": skipped}
         if errors:
-            message += "\n\n" + _("First import warnings:") + "\n" + "\n".join(errors[:20])
+            message += "\\n\\n" + _("First import warnings:") + "\\n" + "\\n".join(errors[:20])
             if len(errors) > 20:
-                message += "\n" + _("...and %(count)s more.") % {"count": len(errors) - 20}
+                message += "\\n" + _("...and %(count)s more.") % {"count": len(errors) - 20}
 
         return {
             "type": "ir.actions.client",

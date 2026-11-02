@@ -13,6 +13,22 @@ The Odoo 19 image is a two-layer stack:
   (the Pro image's first-run auto-install relies on the base entrypoint's
   `ADDONS_INIT_DIRS` support).
 
+## Uganda address hierarchy addon
+
+The Odoo 19 Uganda address addon is maintained at
+`odoo/addons/uganda_address_hierarchy` in this repository.
+
+The development Compose file bind-mounts it into `/mnt/extra-addons`. In an
+existing database, update the Apps list, search for **Uganda Address Hierarchy**,
+and install it. Then open **Contacts → Uganda Addresses → Import CSV** and
+select the supplied `addresshierarchy.csv`.
+
+The production Odoo image is built from the separate `odoo_19_addons` build
+context. To include this addon in a newly built production image, copy this
+module directory into that build context before building and publishing the
+base image. The production Compose service intentionally does not mount host
+addon source directories.
+
 ## Which image runs
 
 Production `docker-compose.yml` pulls `${ODOO_IMAGE:-trigonaltechnology/nidan_odoo:stable}`.

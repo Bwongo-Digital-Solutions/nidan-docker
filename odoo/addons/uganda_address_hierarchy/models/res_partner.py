@@ -33,6 +33,10 @@ class ResPartner(models.Model):
 
     @api.onchange("uganda_district_id")
     def _onchange_uganda_district_id(self):
+        if self.uganda_district_id:
+            uganda = self.env["res.country"].search([("code", "=", "UG")], limit=1)
+            if uganda:
+                self.country_id = uganda
         self.uganda_county_id = False
         self.uganda_subcounty_id = False
         self.uganda_parish_id = False

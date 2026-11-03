@@ -85,7 +85,7 @@ class UgandaAddressArea(models.Model):
                     _("The selected parent is not valid for the %(level)s level.")
                     % {"level": area.level}
                 )
-            if area.id and area.parent_id and area.id in self.search([
+            if area.id and area.parent_id and area.parent_id.id in self.search([
                 ("id", "child_of", area.id),
             ]).ids:
                 raise ValidationError(_("An administrative area cannot be its own ancestor."))

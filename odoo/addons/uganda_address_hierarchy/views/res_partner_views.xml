@@ -14,14 +14,15 @@
                         <field name="uganda_county_id" options="{'no_create': True}"
                                domain="[('level', '=', 'county'), ('parent_id', '=', uganda_district_id)]"/>
                         <field name="uganda_subcounty_id" options="{'no_create': True}"
-                               domain="[('level', '=', 'subcounty'), ('parent_id', '=', uganda_county_id)]"/>
+                               domain="[('level', '=', 'subcounty'), ('parent_id', 'in', [uganda_county_id, uganda_district_id])]"/>
                         <field name="uganda_parish_id" options="{'no_create': True}"
                                domain="[('level', '=', 'parish'), ('parent_id', 'in', [uganda_subcounty_id, uganda_town_council_id, uganda_municipal_division_id, uganda_city_division_id])]"/>
                         <field name="uganda_village_id" options="{'no_create': True}"
                                domain="[('level', '=', 'village'), ('parent_id', '=', uganda_parish_id)]"/>
                     </group>
                     <group>
-                        <field name="uganda_city_id" options="{'no_create': True}"/>
+                        <field name="uganda_city_id" options="{'no_create': True}"
+                               domain="[('level', '=', 'city'), ('parent_id', 'in', [uganda_region_id, uganda_district_id])]"/>
                         <field name="uganda_city_division_id" options="{'no_create': True}"
                                domain="[('level', '=', 'city_division'), ('parent_id', '=', uganda_city_id)]"/>
                         <field name="uganda_municipality_id" options="{'no_create': True}"

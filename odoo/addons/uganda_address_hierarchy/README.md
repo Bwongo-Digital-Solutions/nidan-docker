@@ -1,30 +1,62 @@
 # Uganda Address Hierarchy (Odoo 19)
 
-Adds the Uganda administrative address hierarchy to Odoo Contacts:
+Uganda-specific administrative addresses for Odoo Contacts and the NidanEHR ecosystem. The module supports both rural and urban local-government structures; it does not impose one Nepal-style linear hierarchy on every Ugandan address.
 
-**Country → District → County → Subcounty → Parish → Village**
+## Supported administrative levels
+
+- Country and four geographical regions: Central, Eastern, Northern and Western.
+- Districts and cities.
+- Rural: county, sub-county, parish and village.
+- Urban: city division, municipality, municipal division, town council, ward and zone/cell.
+
+The allowed parent relationships are validated by the model. Examples include District → County → Sub-county → Parish → Village and City → City Division → Ward → Zone. Municipalities and town councils are represented as distinct local-government branches. Not every address must populate every level.
+
+## Contact addresses
+
+The contact form provides cascading rural and urban selectors, a landmark field and optional GPS latitude/longitude. Changing an upper-level selection clears dependent selections. Address fields are optional so incomplete or informal addresses can still be captured.
 
 ## Installation
 
-1. Place this directory in an Odoo addons path.
+1. Ensure this directory is included in the Odoo addons path.
 2. Restart Odoo and update the Apps list.
-3. Install **Uganda Address Hierarchy**.
-4. As an Odoo administrator, open **Contacts → Uganda Addresses → Import CSV**.
-5. Select the supplied addresshierarchy.csv and run the import.
+3. Install Uganda Address Hierarchy.
+4. Open Contacts → Uganda Addresses to manage administrative areas or import a CSV.
 
-The import is safe to repeat: matching areas are reused, inactive matches can be reactivated, non-Uganda rows are ignored, and duplicate paths are skipped. Two five-column source rows combine parish and village in the last quoted value; the importer splits only the first comma in those values and preserves later commas in the village label. Other invalid rows are reported rather than guessed. Existing contacts and address fields are not wiped or rewritten.
+No Nepal localization or Nepal-specific dependency is required.
 
-The contact form adds cascading District, County, Subcounty, Parish and Village selectors. Changing a parent clears child selections that no longer belong to it.
+## CSV import
 
-## CSV source format
+The importer accepts the original six-column rural format, preserving compatibility:
 
-The importer expects six columns, no header row, in this order:
+1. Country (Uganda)
+2. District
+3. County
+4. Sub-county
+5. Parish
+6. Village
 
-1. Country
-2. District (OpenMRS field COUNTY_DISTRICT)
-3. County (STATE_PROVINCE)
-4. Subcounty (ADDRESS_3)
-5. Parish (ADDRESS_4)
-6. Village (ADDRESS_5)
+It also accepts a seven-column regional rural format:
 
-Quoted CSV values, including commas inside a field, are handled by Python's CSV parser.
+1. Country (Uganda)
+2. Region
+3. District
+4. County
+5. Sub-county
+6. Parish
+7. Village
+
+Rows for other countries are ignored. Matching areas are reused, inactive matches can be reactivated, and duplicate paths are skipped. The importer does not invent missing administrative units.
+
+Urban administrative units can be maintained through Contacts → Uganda Addresses → Administrative Areas. Add each record under its valid parent; the model enforces the allowed Uganda parent/child relationships.
+
+## Data governance
+
+Use current administrative-unit registers and boundary datasets published by UBOS and the Ministry of Local Government. Do not treat historical totals as permanent limits: districts, cities and lower local-government units can change. Store official codes in the code field when the source provides them. Import data only from an authoritative, dated source and retain that source/version with the import file.
+
+## Interoperability
+
+The generic uganda.address.area model gives NidanEHR components a common administrative-area record. Integrations with OpenMRS and OpenELIS should exchange stable area IDs/codes rather than relying on free-text names. GPS coordinates are optional and belong to the contact record.
+
+## Security
+
+Internal users have read-only access to administrative areas. System administrators can create, update, deactivate and import records. Administrative data should be maintained by authorized administrators.

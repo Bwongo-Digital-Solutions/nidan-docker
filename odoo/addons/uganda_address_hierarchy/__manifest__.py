@@ -7,6 +7,7 @@
     "license": "LGPL-3",
     "depends": ["base", "contacts"],
     "data": [
+        "data/uganda_regions.xml",
         "security/ir.model.access.csv",
         "views/uganda_address_views.xml",
         "views/res_partner_views.xml",

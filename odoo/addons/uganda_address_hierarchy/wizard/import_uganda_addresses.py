@@ -31,10 +31,14 @@ class UgandaAddressImportWizard(models.TransientModel):
         except (ValueError, UnicodeDecodeError) as exc:
             raise UserError(_("The CSV must be a valid UTF-8 file.")) from exc
 
-        # Parse and de-duplicate paths first, then import one hierarchy level at
-        # a time. This avoids hundreds of thousands of individual ORM searches.
-        levels = ("country", "district", "county", "subcounty", "parish", "village")
-        nodes_by_level = {level: {} for level in levels}
+        legacy_levels = ("country", "district", "county", "subcounty", "parish", "village")
+        regional_levels = ("country", "region", "district", "county", "subcounty", "parish", "village")
+        import_order = (
+            "country", "region", "district", "city", "county", "city_division",
+            "municipality", "subcounty", "town_council", "municipal_division",
+            "parish", "ward", "village", "zone",
+        )
+        nodes_by_level = {level: {} for level in import_order}
         seen_paths = set()
         skipped = ignored = repaired = 0
         errors = []
@@ -42,36 +46,37 @@ class UgandaAddressImportWizard(models.TransientModel):
         for line_number, row in enumerate(csv.reader(io.StringIO(text, newline="")), 1):
             if not row or not any((cell or "").strip() for cell in row):
                 continue
-            # Ignore other countries before validating their row shape.
+            header = [cell.strip().casefold().replace(" ", "_").replace("/", "_") for cell in row]
+            if line_number == 1 and header and header[0] in ("country", "country_name") and any(
+                value in header for value in ("region", "city", "municipality", "town_council")
+            ):
+                continue
             if (row[0] or "").strip().casefold() != "uganda":
                 ignored += 1
                 continue
-
-            # Two Uganda source rows encode parish and village together in the
-            # final quoted cell. Split only the first comma; later commas in
-            # village labels (such as ranch numbers) remain untouched.
             if len(row) == 5 and "," in row[4]:
                 row = row[:4] + [part.strip() for part in row[4].split(",", 1)]
                 repaired += 1
-            if len(row) != 6:
+            if len(row) == 6:
+                row_levels = legacy_levels
+            elif len(row) == 7:
+                row_levels = regional_levels
+            else:
                 skipped += 1
-                errors.append(_("Line %(line)s: expected 6 columns, found %(count)s")
+                errors.append(_("Line %(line)s: expected 6 legacy columns or 7 regional columns, found %(count)s")
                               % {"line": line_number, "count": len(row)})
                 continue
-
             values = tuple((cell or "").strip() for cell in row)
             if not all(values):
                 skipped += 1
                 errors.append(_("Line %s: one or more hierarchy values are empty.") % line_number)
                 continue
-
             normalized = tuple(value.casefold() for value in values)
             if normalized in seen_paths:
                 skipped += 1
                 continue
             seen_paths.add(normalized)
-
-            for index, level in enumerate(levels):
+            for index, level in enumerate(row_levels):
                 parent_key = normalized[:index] or None
                 node_key = (parent_key, normalized[index])
                 nodes_by_level[level].setdefault(node_key, values[index])
@@ -80,19 +85,17 @@ class UgandaAddressImportWizard(models.TransientModel):
         path_to_id = {}
         created = reused = 0
 
-        for index, level in enumerate(levels):
+        for level in import_order:
             existing = Area.search([("level", "=", level)])
             existing_by_parent_name = {
                 (record.parent_id.id or False, record.name.casefold()): record
                 for record in existing
             }
             pending = []
-
             for (parent_key, normalized_name), name in nodes_by_level[level].items():
                 parent_id = path_to_id.get(parent_key) if parent_key else False
                 existing_record = existing_by_parent_name.get((parent_id or False, normalized_name))
                 full_path_key = (parent_key or ()) + (normalized_name,)
-
                 if existing_record:
                     if self.update_existing and not existing_record.active:
                         existing_record.active = True
@@ -100,12 +103,8 @@ class UgandaAddressImportWizard(models.TransientModel):
                     reused += 1
                 else:
                     pending.append((full_path_key, {
-                        "name": name,
-                        "level": level,
-                        "parent_id": parent_id,
+                        "name": name, "level": level, "parent_id": parent_id,
                     }))
-
-            # Keep ORM batches bounded for installations with many villages.
             for offset in range(0, len(pending), 1000):
                 batch = pending[offset:offset + 1000]
                 records = Area.create([values for _key, values in batch])
@@ -118,11 +117,8 @@ class UgandaAddressImportWizard(models.TransientModel):
             "ignored %(ignored)s non-Uganda rows; repaired %(repaired)s five-column rows; "
             "skipped %(skipped)s duplicate or invalid rows."
         ) % {
-            "created": created,
-            "reused": reused,
-            "ignored": ignored,
-            "repaired": repaired,
-            "skipped": skipped,
+            "created": created, "reused": reused, "ignored": ignored,
+            "repaired": repaired, "skipped": skipped,
         }
         if errors:
             message += "\n\n" + _("Import warnings:") + "\n" + "\n".join(errors[:20])

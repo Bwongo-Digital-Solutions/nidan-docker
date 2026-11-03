@@ -3,30 +3,48 @@ networks:
     driver: bridge
 
 volumes:
+    restart: unless-stopped
   openmrs-data:
   openmrs-db-data: # openmrs-db-postgres-data:  # commented - PostgreSQL for OpenMRS disabled for now
+    restart: unless-stopped
 
   odoo-data:
+    restart: unless-stopped
   odoo-db-data:
+    restart: unless-stopped
   orthanc-data:
+    restart: unless-stopped
   orthanc-db-data:
+    restart: unless-stopped
   nidan-openelis-data:
+    restart: unless-stopped
   openelis-db-data:
+    restart: unless-stopped
   openelis-lucene-index:
+    restart: unless-stopped
   openelis-properties:
+    restart: unless-stopped
   certbot-etc:
+    restart: unless-stopped
   certbot-www:
+    restart: unless-stopped
   nidan-integration-db-data:
+    restart: unless-stopped
   dhis2-integration-db-data:
+    restart: unless-stopped
   dhis2-integration-data:
+    restart: unless-stopped
   dhis2-integration-audit-logs:
+    restart: unless-stopped
   dhis2-integration-app-logs:
+    restart: unless-stopped
   superset-home:
 
 services:
   # ============================================================================
   # PROXY / GATEWAY
   # ============================================================================
+    restart: unless-stopped
   gateway:
     # build: ./proxy  # local dev: docker compose build gateway
     # CI: dev → trigonaltechnology/gateway:latest | main → :stable
@@ -147,6 +165,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    restart: unless-stopped
 
   openmrs-db:
     #image: mariadb:10.11
@@ -201,6 +220,7 @@ services:
   # ============================================================================
   # ODOO
   # ============================================================================
+    restart: unless-stopped
   odoo:
     # Open-source base by default; hospitals set ODOO_IMAGE to the private image
     # (e.g. trigonaltechnology/nidan_odoo_pro:stable) which bakes the closed-source
@@ -253,6 +273,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    restart: unless-stopped
 
   odoo-db:
     profiles: ["odoo","nidanehr-standard"]
@@ -280,6 +301,7 @@ services:
   # ============================================================================
   # ORTHANC
   # ============================================================================
+    restart: unless-stopped
   orthanc:
     profiles: ["orthanc","nidanehr-standard"]
     image: orthancteam/orthanc:26.6.0
@@ -363,6 +385,7 @@ services:
       - certbot-www:/var/www/certbot
     networks:
       - nidan-network
+    restart: unless-stopped
 
   openelis-db:
     image: trigonaltechnology/openelis-global-2-database:latest
@@ -387,6 +410,7 @@ services:
       retries: 5
 
   # OpenELIS backend (Tomcat) - FIXED with HTTP enabled
+    restart: unless-stopped
   openelis:
     profiles: ["openelis","nidanehr-standard"]
     image: trigonaltechnology/openelis-global-2:latest
@@ -469,6 +493,7 @@ services:
   # ============================================================================
   # NIDAN INTEGRATION MIDDLEWARE (Kafka + Postgres + CIS/OIS)
   # ============================================================================
+    restart: unless-stopped
   nidan-integration-db:
     profiles: ["middleware","nidanehr-standard"]
     image: postgres:15
@@ -488,6 +513,7 @@ services:
       retries: 5
 
   # Zookeeper for Kafka (Confluent images)
+    restart: unless-stopped
   nidan-zookeeper:
     profiles: ["middleware","nidanehr-standard"]
     image: confluentinc/cp-zookeeper:7.5.0
@@ -682,6 +708,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    restart: unless-stopped
 
   nidan-ois:
     profiles: ["middleware","nidanehr-standard"]
@@ -759,6 +786,7 @@ services:
   # ============================================================================
   # DHIS2 / FEDERAL HMIS INTEGRATION
   # ============================================================================
+    restart: unless-stopped
   nidan-dhis2-db:
     profiles: ["dhis2","nidanehr-standard"]
     image: mysql:8.0

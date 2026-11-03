@@ -3,18 +3,31 @@ networks:
     driver: bridge
 
 volumes:
+    restart: unless-stopped
   openmrs-data:
+    restart: unless-stopped
   openmrs-db-data:
+    restart: unless-stopped
   odoo-data:
+    restart: unless-stopped
   odoo-db-data:
+    restart: unless-stopped
   orthanc-data:
+    restart: unless-stopped
   orthanc-db-data:
+    restart: unless-stopped
   keycloak-db-data:
+    restart: unless-stopped
   openelis-db-data:
+    restart: unless-stopped
   openelis-lucene-index:
+    restart: unless-stopped
   openelis-properties:
+    restart: unless-stopped
   certbot-etc:
+    restart: unless-stopped
   certbot-www:
+    restart: unless-stopped
   nidan-integration-db-data:
 
 
@@ -22,6 +35,7 @@ services:
   # ============================================================================
   # PROXY / GATEWAY
   # ============================================================================
+    restart: unless-stopped
   gateway:
     build: ./proxy
     image: nidan/gateway:latest
@@ -89,6 +103,7 @@ services:
       timeout: 10s
       retries: 10
       start_period: 120s
+    restart: unless-stopped
 
   openmrs-frontend:
     build:
@@ -114,6 +129,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    restart: unless-stopped
 
   openmrs-db:
     image: mariadb:10.11.7
@@ -140,6 +156,7 @@ services:
   # ============================================================================
   # ODOO
   # ============================================================================
+    restart: unless-stopped
   odoo:
     build: ./odoo
     image: nidan/odoo:19
@@ -188,6 +205,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    restart: unless-stopped
 
   odoo-db:
     image: postgres:15
@@ -214,6 +232,7 @@ services:
   # ============================================================================
   # KEYCLOAK
   # ============================================================================
+    restart: unless-stopped
   keycloak:
     image: quay.io/keycloak/keycloak:22.0
     container_name: nidan-keycloak
@@ -240,6 +259,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    restart: unless-stopped
 
   keycloak-db:
     image: postgres:15
@@ -256,6 +276,7 @@ services:
   # ============================================================================
   # ORTHANC
   # ============================================================================
+    restart: unless-stopped
   orthanc:
     image: orthancteam/orthanc:26.6.0
     container_name: nidan-orthanc
@@ -329,6 +350,7 @@ services:
       - certbot-www:/var/www/certbot
     networks:
       - nidan-network
+    restart: unless-stopped
 
   openelis-db:
     image: dipakthapa/openelis-global-2-database:latest
@@ -426,6 +448,7 @@ services:
   # ============================================================================
   # NIDAN INTEGRATION MIDDLEWARE (Kafka + Postgres + CIS/OIS)
   # ============================================================================
+    restart: unless-stopped
   nidan-integration-db:
     image: postgres:15
     container_name: nidan-integration-db
@@ -444,6 +467,7 @@ services:
       retries: 5
 
   # Zookeeper for Kafka (Confluent images)
+    restart: unless-stopped
   nidan-zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: nidan-zookeeper
@@ -452,6 +476,7 @@ services:
       ZOOKEEPER_TICK_TIME: ${ZOOKEEPER_TICK_TIME:-2000}
     networks:
       - nidan-network
+    restart: unless-stopped
 
   nidan-kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -469,6 +494,7 @@ services:
       - nidan-zookeeper
     networks:
       - nidan-network
+    restart: unless-stopped
 
   nidan-cis:
     build:
@@ -554,6 +580,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    restart: unless-stopped
 
   nidan-ois:
     build:
@@ -604,3 +631,4 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    restart: unless-stopped

@@ -108,3 +108,78 @@ docker-compose up -d
 *   **OpenMRS**: [http://localhost/openmrs](http://localhost/openmrs)
 *   **Odoo**: [http://localhost:8069](http://localhost:8069)
 
+
+
+## Automatic startup after power interruptions (Ubuntu)
+
+Docker and the NidanEHR application containers are configured to start automatically
+when the Ubuntu host boots and the Docker daemon starts. Compose services use
+`restart: unless-stopped`, so a service that was explicitly stopped remains stopped.
+
+### Enable Docker at boot
+
+Run once on the Ubuntu host:
+
+```bash
+sudo systemctl enable containerd
+sudo systemctl enable --now docker
+```
+
+### Apply the restart policies to the deployment
+
+After pulling the updated branch, recreate/update the Compose services using the
+same Compose files and profiles used for this installation. For the development
+stack, for example:
+
+```bash
+docker compose -f dev.docker-compose.yml up -d
+```
+
+For the main stack, use its normal Compose file and profile selection, for example:
+
+```bash
+docker compose --profile nidanehr-standard up -d
+```
+
+Do not use both example commands unless both stacks are intentionally deployed.
+Existing containers must be recreated/updated from the revised Compose configuration
+for the new restart policies to take effect.
+
+### Orthanc remains manual
+
+The `orthanc` and `orthanc-db` services deliberately have no restart policy.
+They will not automatically start when Docker starts. Start them only when required,
+using the same Compose files/profile used for the deployment, for example:
+
+```bash
+docker compose --profile orthanc up -d orthanc-db orthanc
+```
+
+Stop them when finished:
+
+```bash
+docker compose --profile orthanc stop orthanc orthanc-db
+```
+
+### Verify
+
+```bash
+sudo systemctl is-enabled docker
+docker ps -a --format 'table {{.Names}}\\t{{.Status}}'
+docker inspect -f '{{.Name}}: {{.HostConfig.RestartPolicy.Name}}' $(docker ps -aq)
+```
+
+All application containers should report `unless-stopped`. Orthanc and its
+database should report `no`. A Docker daemon restart can be used to test container
+recovery without rebooting the host:
+
+```bash
+sudo systemctl restart docker
+docker ps
+```
+
+Docker restart policies do not guarantee application readiness; the existing
+Compose health checks and dependency conditions remain responsible for readiness.
+For protection against sudden power loss, keep database volumes persistent and
+use a UPS where possible. Configure the computer BIOS/UEFI power-recovery setting
+to power on automatically when mains electricity returns.

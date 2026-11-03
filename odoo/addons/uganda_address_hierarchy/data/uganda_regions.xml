@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="uganda_country_area" model="uganda.address.area">
+        <field name="name">Uganda</field>
+        <field name="level">country</field>
+    </record>
+    <record id="uganda_region_central" model="uganda.address.area">
+        <field name="name">Central</field>
+        <field name="level">region</field>
+        <field name="parent_id" ref="uganda_country_area"/>
+    </record>
+    <record id="uganda_region_eastern" model="uganda.address.area">
+        <field name="name">Eastern</field>
+        <field name="level">region</field>
+        <field name="parent_id" ref="uganda_country_area"/>
+    </record>
+    <record id="uganda_region_northern" model="uganda.address.area">
+        <field name="name">Northern</field>
+        <field name="level">region</field>
+        <field name="parent_id" ref="uganda_country_area"/>
+    </record>
+    <record id="uganda_region_western" model="uganda.address.area">
+        <field name="name">Western</field>
+        <field name="level">region</field>
+        <field name="parent_id" ref="uganda_country_area"/>
+    </record>
+</odoo>

@@ -6,8 +6,10 @@
         <field name="arch" type="xml">
             <list>
                 <field name="complete_name"/>
+                <field name="code"/>
                 <field name="level"/>
                 <field name="parent_id"/>
+                        <field name="code"/>
                 <field name="active"/>
             </list>
         </field>

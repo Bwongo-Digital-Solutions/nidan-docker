@@ -1,7 +1,7 @@
 {
     "name": "Uganda Address Hierarchy",
-    "summary": "Uganda district, county, subcounty, parish and village addresses",
-    "version": "19.0.1.0.0",
+    "summary": "Uganda rural and urban administrative addresses for NidanEHR",
+    "version": "19.0.2.0.0",
     "category": "Contacts",
     "author": "Bwongo Digital Solutions",
     "license": "LGPL-3",

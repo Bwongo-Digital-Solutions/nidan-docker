@@ -106,6 +106,10 @@ class ResPartner(models.Model):
     @api.onchange("uganda_city_id")
     def _onchange_uganda_city_id(self):
         self._clear_uganda_address("uganda_city_division_id", "uganda_parish_id", "uganda_ward_id", "uganda_village_id", "uganda_zone_id")
+        if self.uganda_city_id:
+            uganda = self.env["res.country"].search([("code", "=", "UG")], limit=1)
+            if uganda:
+                self.country_id = uganda
 
     @api.onchange("uganda_city_division_id", "uganda_municipality_id", "uganda_town_council_id")
     def _onchange_uganda_urban_parent_id(self):
@@ -172,6 +176,13 @@ class ResPartner(models.Model):
                 if child and parent and child.parent_id != parent:
                     raise ValidationError(_("Each selected address must belong to the selected parent area."))
 
+            if partner.uganda_city_id:
+                city_parent = partner.uganda_city_id.parent_id
+                if city_parent.level == "region" and partner.uganda_region_id and city_parent != partner.uganda_region_id:
+                    raise ValidationError(_("The selected city does not belong to the selected region."))
+                if city_parent.level == "district" and partner.uganda_district_id and city_parent != partner.uganda_district_id:
+                    raise ValidationError(_("The selected city does not belong to the selected district."))
+
             parish_parent = partner.uganda_parish_id.parent_id if partner.uganda_parish_id else False
             selected_parish_parents = (
                 partner.uganda_subcounty_id, partner.uganda_town_council_id,
@@ -188,9 +199,9 @@ class ResPartner(models.Model):
             if partner.uganda_ward_id and ward_parent not in selected_ward_parents:
                 raise ValidationError(_("The selected ward does not belong to the selected urban division."))
 
-            if partner.uganda_gps_latitude and not -90 <= partner.uganda_gps_latitude <= 90:
+            if partner.uganda_gps_latitude is not False and not -90 <= partner.uganda_gps_latitude <= 90:
                 raise ValidationError(_("GPS latitude must be between -90 and 90."))
-            if partner.uganda_gps_longitude and not -180 <= partner.uganda_gps_longitude <= 180:
+            if partner.uganda_gps_longitude is not False and not -180 <= partner.uganda_gps_longitude <= 180:
                 raise ValidationError(_("GPS longitude must be between -180 and 180."))
             if partner.uganda_region_id or partner.uganda_district_id or partner.uganda_city_id:
                 uganda = self.env["res.country"].search([("code", "=", "UG")], limit=1)

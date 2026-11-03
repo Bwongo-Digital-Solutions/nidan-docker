@@ -16,7 +16,7 @@ class ResPartner(models.Model):
     )
     uganda_city_id = fields.Many2one(
         "uganda.address.area", string="City",
-        domain="[('level', '=', 'city')]", ondelete="restrict",
+        domain="[('level', '=', 'city'), ('parent_id', 'in', [uganda_region_id, uganda_district_id])]", ondelete="restrict",
     )
     uganda_city_division_id = fields.Many2one(
         "uganda.address.area", string="City Division",
@@ -35,7 +35,7 @@ class ResPartner(models.Model):
     )
     uganda_subcounty_id = fields.Many2one(
         "uganda.address.area", string="Sub-county",
-        domain="[('level', '=', 'subcounty'), ('parent_id', '=', uganda_county_id)]",
+        domain="[('level', '=', 'subcounty'), ('parent_id', 'in', [uganda_county_id, uganda_district_id])]",
         ondelete="restrict",
     )
     uganda_town_council_id = fields.Many2one(
